@@ -21,27 +21,30 @@
     <button onclick="chart.expandAll().fit()">Expand All</button>
     <button onclick="chart.collapseAll().fit()">Collapse All</button>
 
+    <!-- Searches -->
+    <input type="search" placeholder="search by name" oninput="filterChart(event)" />
+
+    <!-- Toggle Centering -->
+    <button id="toggle-centering" onclick="toggleCentering()">Disable Centering</button>
+
+    <!-- Toggle compact -->
+    <button id="toggle-compact" onclick="toggleCompact()">Switch to Compact</button>
+
+    <!-- Toggle Orientation -->
+    <label for="orientation-dropdown">Orientation Mode:</label>
+    <select id="orientation-dropdown" onchange="toggleOrientation(event)">
+        <option value="top" selected>Top</option>
+        <option value="bottom">Bottom</option>
+        <option value="left">Left</option>
+        <option value="right">Right</option>
+    </select>
+
     <!--
     <button onclick="chart.layout('top').render().fit()">Top</button>
     <button onclick="chart.layout('left').render().fit()">Left</button>
     <button onclick="chart.layout('right').render().fit()">Right</button>
     <button onclick="chart.layout('bottom').render().fit()">Bottom</button>
     -->
-
-    <!-- Searches -->
-    <input type="search" placeholder="search by name" oninput="filterChart(event)" />
-
-    <!-- Centering -->
-    <button onclick="chart.setActiveNodeCentered(false).render()">
-        Do Not Center Active Node
-    </button>
-    <button onclick="chart.setActiveNodeCentered(true).render()">
-        Center Active Node
-    </button>
-
-    <!-- Orientation -->
-    <button onclick="chart.compact(false).render().fit()">Horizontal</button>
-    <button onclick="chart.compact(true).render().fit()">Compact</button>
 
     <h1>test1</h1>
 
@@ -55,18 +58,35 @@
     <script>
         var chart = null;
 
+        let isCenteringEnabled = true;
+        let isCompactEnabled = false;
+
+        function toggleCentering() {
+            isCenteringEnabled = !isCenteringEnabled;
+            chart.setActiveNodeCentered(isCenteringEnabled).render();
+
+            document.getElementById('toggle-centering').textContent =
+                isCenteringEnabled ? "Disable Centering" : "Enable Centering";
+        }
+
+        function toggleCompact() {
+            isCompactEnabled = !isCompactEnabled;
+            chart.compact(isCompactEnabled).render().fit();
+
+            document.getElementById('toggle-orientation').textContent =
+                isCompactEnabled ? "Switch to Horizontal" : "Switch to Compact";
+        }
+
+        function toggleOrientation(event) {
+            const selectedLayout = event.target.value;
+            chart.layout(selectedLayout).render().fit();
+        }
+
         function filterChart(e) {
-            // Get input value
-            const value = e.srcElement.value;
-
-            // Clear previous higlighting
-            chart.clearHighlighting();
-
-            // Get chart nodes
-            const data = chart.data();
-
-            // Mark all previously expanded nodes for collapse
-            data.forEach((d) => (d._expanded = false));
+            const value = e.srcElement.value; // Get input value
+            chart.clearHighlighting(); // Clear previous higlighting
+            const data = chart.data(); // Get chart nodes
+            data.forEach((d) => (d._expanded = false)); // Mark all previously expanded nodes for collapse
 
             // Loop over data and check if input value matches any name
             data.forEach((d) => {
@@ -76,10 +96,7 @@
                     d._expanded = true;
                 }
             });
-
-            // Update data and rerender graph
-            chart.data(data).render().fit();
-
+            chart.data(data).render().fit(); // Update data and rerender graph
             console.log('filtering chart', e.srcElement.value);
         }
     </script>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Org Chart Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- JavaScript files-->
+    <script src="code.js" type="module"></script>
+
+    <!-- d3 Package Install -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+
+    <!-- Sizing and Formatting -->
+    <button onclick="chart.expandAll().fit()">Expand All</button>
+    <button onclick="chart.collapseAll().fit()">Collapse All</button>
+
+    <!--
+    <button onclick="chart.layout('top').render().fit()">Top</button>
+    <button onclick="chart.layout('left').render().fit()">Left</button>
+    <button onclick="chart.layout('right').render().fit()">Right</button>
+    <button onclick="chart.layout('bottom').render().fit()">Bottom</button>
+    -->
+
+    <!-- Searches -->
+    <input type="search" placeholder="search by name" oninput="filterChart(event)" />
+
+    <!-- Centering -->
+    <button onclick="chart.setActiveNodeCentered(false).render()">
+        Do Not Center Active Node
+    </button>
+    <button onclick="chart.setActiveNodeCentered(true).render()">
+        Center Active Node
+    </button>
+
+    <!-- Orientation -->
+    <button onclick="chart.compact(false).render().fit()">Horizontal</button>
+    <button onclick="chart.compact(true).render().fit()">Compact</button>
+
+    <h1>test1</h1>
+
+    <div class="chart-container" style="height: 1200px"></div>
+
+    <button onclick="chart.exportImg()">Export Current</button>
+    <button onclick="chart.exportImg({full:true})">Export Full</button>
+    <button onclick="chart.exportSvg()">Export SVG</button>
+    <button onclick="downloadPdf(chart)">Export PDF</button>
+
+    <script>
+        var chart = null;
+
+        function filterChart(e) {
+            // Get input value
+            const value = e.srcElement.value;
+
+            // Clear previous higlighting
+            chart.clearHighlighting();
+
+            // Get chart nodes
+            const data = chart.data();
+
+            // Mark all previously expanded nodes for collapse
+            data.forEach((d) => (d._expanded = false));
+
+            // Loop over data and check if input value matches any name
+            data.forEach((d) => {
+                if (value != '' && d.name.toLowerCase().includes(value.toLowerCase())) {
+                    // If matches, mark node as highlighted
+                    d._highlighted = true;
+                    d._expanded = true;
+                }
+            });
+
+            // Update data and rerender graph
+            chart.data(data).render().fit();
+
+            console.log('filtering chart', e.srcElement.value);
+        }
+    </script>
+
+    <script type="module">
+        import { org_data } from '../code.js';
+        console.log(org_data);
+
+        chart = new d3.OrgChart()
+            .nodeId((node) => node.id)
+            .parentNodeId((node) => node.parent)
+            .nodeWidth((node) => 250) // Control Width
+            .initialZoom(0.7)
+            .nodeHeight((node) => 180) // Control Height
+            .childrenMargin((node) => 40)
+            .compactMarginBetween((node) => 15)
+            .compactMarginPair((node) => 80)
+            .nodeContent((node) => {
+                return `
+                    <div class="node-container" style="height:${node.height}px">
+                        <div class="node" style="height:${node.height - 32}px;border:2px solid ${node.data.color};border-top: 10px solid ${node.data.color};">
+
+                            <img src=" ${node.data.thumbnail}" class="node-image" style="margin-left:${node.width / 2 - 30}px;" />
+
+                            <div style="margin-right:10px;margin-top:15px;float:right">${node.id}</div>                
+
+                            <div class="node-body">
+                                <h3>${node.data.name}</h1>
+                                <h4>${node.data.description}</h4>
+                            </div>
+                            <div class="node-footnotes">
+                                <div > Class: ${node.data.subnoteA} </div>  
+                                <div > Quarter: ${node.data.subnoteB} </div>    
+                            </div>
+                        </div>     
+                    </div>
+                `;
+            })
+            .container('.chart-container')
+            .data(org_data)
+            .render();
+    </script>
+</body>
+
+</html>

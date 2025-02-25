@@ -100,10 +100,37 @@
             chart.data(data).render().fit(); // Update data and rerender graph
             console.log('filtering chart', e.srcElement.value);
         }
+
+        function countLineBreaks(text, containerWidth, font) {
+            font = font + "px sans-serif";
+
+            if (!text) return 0;
+            const canvas = document.createElement("canvas"); // Create a temporary canvas for measurement.
+            const ctx = canvas.getContext("2d");
+            ctx.font = font;
+
+            const segments = text.split(/<br>/gi); // Split the text by <br> tags.
+            let totalLines = 0;
+            segments.forEach(segment => {
+                const measuredWidth = ctx.measureText(segment).width; // Measure the pixel width of this segment.
+                totalLines += Math.ceil(measuredWidth / containerWidth); // Number of lines this segment will span
+            });
+            return Math.max(0, totalLines);
+        }
     </script>
 
     <script type="module">
-        import { org_data } from '../code.js';
+        import { data } from '../code.js';
+
+        var org_data = data.map(item => ({
+            ...item,
+            name: item.name ? item.name.replace(/\n/g, '<br>') : '',
+            description: item.description ? item.description.replace(/\n/g, '<br>') : '',
+            subnoteA: item.subnoteA ? item.subnoteA.replace(/\n/g, '<br>') : '',
+            subnoteB: item.subnoteB ? item.subnoteB.replace(/\n/g, '<br>') : '',
+            tooltip: item.tooltip ? item.tooltip.replace(/\n/g, '<br>') : ''
+        }));
+
         console.log(org_data);
 
         chart = new d3.OrgChart()
@@ -111,7 +138,20 @@
             .parentNodeId((node) => node.parent)
             .nodeWidth((node) => 250) // Control Width
             .initialZoom(0.7)
-            .nodeHeight((node) => 180) // Control Height
+            .nodeHeight((node) => {
+                const baselineHeight = 140;
+
+                const nameBreaks = countLineBreaks(node.data.name, 250, 16);
+                const descriptionBreaks = countLineBreaks(node.data.description, 250, 16);
+                const addNameDescription = (nameBreaks + descriptionBreaks) * 16;
+
+                const subnoteABreaks = countLineBreaks(node.data.subnoteA, 250, 14);
+                const subnoteBBreaks = countLineBreaks(node.data.subnoteB, 250, 14);
+                const maxSubBreaks = Math.max(subnoteABreaks, subnoteBBreaks);
+                const addSubnotes = maxSubBreaks * 14;
+
+                return baselineHeight + addNameDescription + addSubnotes;
+            })
             .childrenMargin((node) => 40)
             .compactMarginBetween((node) => 15)
             .compactMarginPair((node) => 80)

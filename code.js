@@ -1,4 +1,4 @@
-export const org_data = [
+export const data = [
     {
         name: 'name1',
         id: 0,
@@ -6,7 +6,7 @@ export const org_data = [
         child: 1,
         description: 'Tester 111 test', // optional
         subnoteA: "Alpha",
-        subnoteB: "2004",
+        subnoteB: "Year:\n2011 Fall",
         tooltip: 'name1', // optional
         color: '#db4073', // optional
         thumbnail: null // optional
@@ -17,7 +17,7 @@ export const org_data = [
         parent: 0,
         child: null,
         description: 'Tester 111 test', // optional
-        subnoteA: '',
+        subnoteB: "Year",
         tooltip: 'name1', // optional
         color: 'blue', // optional
         thumbnail: null // optional
@@ -27,7 +27,6 @@ export const org_data = [
         id: 2,
         parent: 0,
         child: 3,
-        description: 'Tester 111 test', // optional
         tooltip: 'name1', // optional
         color: '#db4073', // optional
         thumbnail: null // optional
@@ -44,5 +43,5 @@ export const org_data = [
     }
 ];
 
-console.log(org_data);
-console.log(org_data[0]);
+console.log(data);
+console.log(data[0]);

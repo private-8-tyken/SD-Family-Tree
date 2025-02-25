@@ -16,6 +16,8 @@
             height: 100%;
             margin: 0;
             position: relative;
+            font-family: Inter, sans-serif;
+            font-size: 16px;
         }
 
         body {
@@ -41,7 +43,7 @@
         h4 {
             font-size: 16px;
             margin-top: 2px;
-            font-weight: lighter;
+            font-weight: normal;
         }
 
         .chart-container {
@@ -222,6 +224,9 @@
 </head>
 
 <body>
+    <!-- JavaScript files-->
+    <script src="code.js" type="module"></script>
+
     <!-- d3 Package Install -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
@@ -255,6 +260,8 @@
             </div>
         </div>
     </div>
+
+    <h1>test1</h1>
 
     <div class="chart-container"></div>
 
@@ -308,11 +315,37 @@
             chart.data(data).render().fit(); // Update data and rerender graph
             console.log('filtering chart', e.srcElement.value);
         }
+
+        function countLineBreaks(text, containerWidth, font) {
+            font = font + "px sans-serif";
+
+            if (!text) return 0;
+            const canvas = document.createElement("canvas"); // Create a temporary canvas for measurement.
+            const ctx = canvas.getContext("2d");
+            ctx.font = font;
+
+            const segments = text.split(/<br>/gi); // Split the text by <br> tags.
+            let totalLines = 0;
+            segments.forEach(segment => {
+                const measuredWidth = ctx.measureText(segment).width; // Measure the pixel width of this segment.
+                totalLines += Math.ceil(measuredWidth / containerWidth); // Number of lines this segment will span
+            });
+            return Math.max(0, totalLines);
+        }
     </script>
 
     <script type="module">
         google.script.run.withSuccessHandler(function (data) {
-            var org_data = data;
+
+            var org_data = data.map(item => ({
+                ...item,
+                name: item.name ? item.name.replace(/\n/g, '<br>') : '',
+                description: item.description ? item.description.replace(/\n/g, '<br>') : '',
+                subnoteA: item.subnoteA ? item.subnoteA.replace(/\n/g, '<br>') : '',
+                subnoteB: item.subnoteB ? item.subnoteB.replace(/\n/g, '<br>') : '',
+                tooltip: item.tooltip ? item.tooltip.replace(/\n/g, '<br>') : ''
+            }));
+
             console.log(org_data);
 
             chart = new d3.OrgChart()
@@ -320,7 +353,20 @@
                 .parentNodeId((node) => node.parent)
                 .nodeWidth((node) => 250) // Control Width
                 .initialZoom(0.7)
-                .nodeHeight((node) => 180) // Control Height
+                .nodeHeight((node) => {
+                    const baselineHeight = 140;
+
+                    const nameBreaks = countLineBreaks(node.data.name, 250, 16);
+                    const descriptionBreaks = countLineBreaks(node.data.description, 250, 16);
+                    const addNameDescription = (nameBreaks + descriptionBreaks) * 16;
+
+                    const subnoteABreaks = countLineBreaks(node.data.subnoteA, 250, 14);
+                    const subnoteBBreaks = countLineBreaks(node.data.subnoteB, 250, 14);
+                    const maxSubBreaks = Math.max(subnoteABreaks, subnoteBBreaks);
+                    const addSubnotes = maxSubBreaks * 14;
+
+                    return baselineHeight + addNameDescription + addSubnotes;
+                })
                 .childrenMargin((node) => 40)
                 .compactMarginBetween((node) => 15)
                 .compactMarginPair((node) => 80)
@@ -339,22 +385,25 @@
                 })
                 .nodeContent((node) => {
                     return `
-                        <div class="node-container" style="height:${node.height}px">
-                            <div class="node" style="height:${node.height - 32}px;border:2px solid ${node.data.color};border-top: 10px solid ${node.data.color};">
-
-                                <img src=" ${node.data.thumbnail}" class="node-image" style="margin-left:${node.width / 2 - 30}px;" />
-
-                                <div class="node-body">
-                                    <h3>${node.data.name}</h1>
-                                    <h4>${node.data.description}</h4>
+                        <div class="node-container" style="height: ${node.height}px; padding-top: 20px; background-color: transparent; margin-left: 1px; border-radius: 2px; overflow: visible; font-family: Inter, sans-serif; font-size: 16px; position: relative;">
+                            <div class="node" style="height: ${node.height - 32}px; border: 2px solid ${node.data.color}; border-top: 10px solid ${node.data.color}; padding-top: 0px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;">
+                                
+                                <img src="${node.data.thumbnail}" class="node-image" style="margin-left: ${node.width / 2 - 30}px; margin-top: -35px; border-radius: 100px; width: 60px; height: 60px;" />
+                                
+                                <div class="node-body" style="padding: 20px; padding-top: 25px; text-align: center;">
+                                <h3 style="font-size: 16px; font-weight: bold; margin: 0; color: black;">${node.data.name}</h3>
+                                <h4 style="font-size: 16px; margin-top: 2px; font-weight: normal; font-style: italic; margin: 0; color: black;">${node.data.description}</h4>
                                 </div>
-                                <div class="node-footnotes">
-                                    <div > ${node.data.subnoteA} </div>
-                                    <div > ${node.data.subnoteB} </div>
+                                
+                                <div class="node-footnotes" style="display: flex; justify-content: space-between; padding-left: 15px; padding-right: 15px;">
+                                <div>${node.data.subnoteA}</div>
+                                <div>${node.data.subnoteB}</div>
                                 </div>
-
-                                <!-- Node-specific tooltip -->
-                                <div class="node-tooltip">${node.data.tooltip}</div>
+                                
+                                <!-- Node-specific tooltip (static; hover behavior not possible inline) -->
+                                <div class="node-tooltip" style="position: absolute; background-color: rgba(0, 0, 0, 0.8); color: white; padding: 8px; border-radius: 5px; font-size: 14px; white-space: nowrap; z-index: 10; transform: translate(-50%, 150%); left: 50%; top: -10px;">
+                                ${node.data.tooltip}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -367,3 +416,5 @@
 </body>
 
 </html>
+
+

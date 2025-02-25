@@ -17,43 +17,45 @@
     <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
 
-    <!-- Sizing and Formatting -->
-    <button onclick="chart.expandAll().fit()">Expand All</button>
-    <button onclick="chart.collapseAll().fit()">Collapse All</button>
+    <div class="top-controls">
+        <div class="left-controls">
+            <!-- Sizing and Formatting -->
+            <button onclick="chart.expandAll().fit()">Expand All</button>
+            <button onclick="chart.collapseAll().fit()">Collapse All</button>
 
-    <!-- Searches -->
-    <input type="search" placeholder="search by name" oninput="filterChart(event)" />
+            <!-- Searches -->
+            <input type="search" placeholder="search by name" oninput="filterChart(event)" />
+        </div>
+        <div class="right-controls">
+            <!-- Toggle Centering -->
+            <button id="toggle-centering" onclick="toggleCentering()">Disable Centering</button>
 
-    <!-- Toggle Centering -->
-    <button id="toggle-centering" onclick="toggleCentering()">Disable Centering</button>
+            <!-- Toggle compact -->
+            <button id="toggle-compact" onclick="toggleCompact()">Switch to Compact</button>
 
-    <!-- Toggle compact -->
-    <button id="toggle-compact" onclick="toggleCompact()">Switch to Compact</button>
-
-    <!-- Toggle Orientation -->
-    <label for="orientation-dropdown">Orientation Mode:</label>
-    <select id="orientation-dropdown" onchange="toggleOrientation(event)">
-        <option value="top" selected>Top</option>
-        <option value="bottom">Bottom</option>
-        <option value="left">Left</option>
-        <option value="right">Right</option>
-    </select>
-
-    <!--
-    <button onclick="chart.layout('top').render().fit()">Top</button>
-    <button onclick="chart.layout('left').render().fit()">Left</button>
-    <button onclick="chart.layout('right').render().fit()">Right</button>
-    <button onclick="chart.layout('bottom').render().fit()">Bottom</button>
-    -->
+            <!-- Toggle Orientation -->
+            <div class="orientation-dropdown">
+                <label for="orientation-dropdown">Orientation Mode:</label>
+                <select id="orientation-dropdown" onchange="toggleOrientation(event)">
+                    <option value="top" selected>Top</option>
+                    <option value="bottom">Bottom</option>
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                </select>
+            </div>
+        </div>
+    </div>
 
     <h1>test1</h1>
 
-    <div class="chart-container" style="height: 1200px"></div>
+    <div class="chart-container"></div>
 
-    <button onclick="chart.exportImg()">Export Current</button>
-    <button onclick="chart.exportImg({full:true})">Export Full</button>
-    <button onclick="chart.exportSvg()">Export SVG</button>
-    <button onclick="downloadPdf(chart)">Export PDF</button>
+    <div class="top-controls"><div class="left-controls">
+        <button onclick="chart.exportImg()">Export Current</button>
+        <button onclick="chart.exportImg({full:true})">Export Full</button>
+        <button onclick="chart.exportSvg()">Export SVG</button>
+        <button onclick="downloadPdf(chart)">Export PDF</button>
+    </div></div>
 
     <script>
         var chart = null;
@@ -114,6 +116,19 @@
             .childrenMargin((node) => 40)
             .compactMarginBetween((node) => 15)
             .compactMarginPair((node) => 80)
+            .linkUpdate(function (d, i, arr) {
+                d3.select(this)
+                    .attr('stroke', (d) =>
+                        d.data._upToTheRootHighlighted ? 'black' : 'grey'
+                    )
+                    .attr('stroke-width', (d) =>
+                        d.data._upToTheRootHighlighted ? 15 : 1.5
+                    );
+
+                if (d.data._upToTheRootHighlighted) {
+                    d3.select(this).raise();
+                }
+            })
             .nodeContent((node) => {
                 return `
                     <div class="node-container" style="height:${node.height}px">

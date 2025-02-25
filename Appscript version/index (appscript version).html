@@ -2,275 +2,275 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Org Chart Page</title>
-  <style>
-    :root {
-      --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.5);
-      --shadow-dark: 0 4px 10px rgba(0, 0, 0, 0.8);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Org Chart Page</title>
+    <style>
+        :root {
+            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.5);
+            --shadow-dark: 0 4px 10px rgba(0, 0, 0, 0.8);
+        }
 
-    html,
-    body {
-      height: 100%;
-      margin: 0;
-      position: relative;
-      font-family: Inter, sans-serif;
-      font-size: 16px;
-    }
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            position: relative;
+            font-family: Inter, sans-serif;
+            font-size: 16px;
+        }
 
-    body {
-      display: flex;
-      flex-direction: column;
-    }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
 
-    /* ----Headers---- */
-    h1,
-    h2,
-    h3,
-    h4,
-    h5 {
-      margin: 0;
-      color: black;
-    }
+        /* ----Headers---- */
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            margin: 0;
+            color: black;
+        }
 
-    h3 {
-      font-size: 16px;
-      font-weight: bold;
-    }
+        h3 {
+            font-size: 16px;
+            font-weight: bold;
+        }
 
-    h4 {
-      font-size: 16px;
-      margin-top: 2px;
-      font-weight: normal;
-    }
+        h4 {
+            font-size: 16px;
+            margin-top: 2px;
+            font-weight: normal;
+        }
 
-    .chart-container {
-      position: absolute;
-      height: fit-content;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      overflow: hidden;
-    }
+        .chart-container {
+            position: absolute;
+            height: fit-content;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+        }
 
-    /* ----Button Styling---- https://getcssscan.com/css-buttons-examples button 56*/
-    button,
-    input,
-    .orientation-dropdown {
-      margin: 0.5rem;
-      align-items: center;
-      background-color: #fee6e3;
-      border: 2px solid #111;
-      border-radius: 8px;
-      box-sizing: border-box;
-      color: #111;
-      cursor: pointer;
-      display: inline-flex;
-      font-size: 16px;
-      height: 48px;
-      line-height: 24px;
-      max-width: 100%;
-      padding: 0 25px;
-      position: relative;
-      touch-action: manipulation;
-    }
+        /* ----Button Styling---- https://getcssscan.com/css-buttons-examples button 56*/
+        button,
+        input,
+        .orientation-dropdown {
+            margin: 0.5rem;
+            align-items: center;
+            background-color: #fee6e3;
+            border: 2px solid #111;
+            border-radius: 8px;
+            box-sizing: border-box;
+            color: #111;
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 16px;
+            height: 48px;
+            line-height: 24px;
+            max-width: 100%;
+            padding: 0 25px;
+            position: relative;
+            touch-action: manipulation;
+        }
 
-    button:after,
-    input:after,
-    .orientation-dropdown:after {
-      background-color: #111;
-      border-radius: 8px;
-      content: "";
-      display: block;
-      height: 48px;
-      left: 0;
-      width: 100%;
-      position: absolute;
-      top: -2px;
-      transform: translate(8px, 8px);
-      transition: transform .2s ease-out;
-      z-index: -1;
-    }
+        button:after,
+        input:after,
+        .orientation-dropdown:after {
+            background-color: #111;
+            border-radius: 8px;
+            content: "";
+            display: block;
+            height: 48px;
+            left: 0;
+            width: 100%;
+            position: absolute;
+            top: -2px;
+            transform: translate(8px, 8px);
+            transition: transform .2s ease-out;
+            z-index: -1;
+        }
 
-    button:hover:after {
-      transform: translate(0, 0);
-    }
+        button:hover:after {
+            transform: translate(0, 0);
+        }
 
-    button:active {
-      background-color: #ffdeda;
-      outline: 0;
-    }
+        button:active {
+            background-color: #ffdeda;
+            outline: 0;
+        }
 
-    button:hover {
-      outline: 0;
-    }
+        button:hover {
+            outline: 0;
+        }
 
-    @media (min-width: 768px) {
-      button {
-        padding: 0 40px;
-      }
-    }
+        @media (min-width: 768px) {
+            button {
+                padding: 0 40px;
+            }
+        }
 
-    /* ----Node Styling---- */
-    .node-container {
-      padding-top: 20px;
-      background-color: none;
-      margin-left: 1px;
-      border-radius: 2px;
-      overflow: visible;
-    }
+        /* ----Node Styling---- */
+        .node-container {
+            padding-top: 20px;
+            background-color: none;
+            margin-left: 1px;
+            border-radius: 2px;
+            overflow: visible;
+        }
 
-    .node {
-      padding-top: 0px;
-      box-shadow: var(--shadow-light);
-      transition: all 0.3s ease;
-    }
+        .node {
+            padding-top: 0px;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
 
-    .node:hover {
-      box-shadow: var(--shadow-dark);
-    }
+        .node:hover {
+            box-shadow: var(--shadow-dark);
+        }
 
-    .node-image {
-      margin-top: -35px;
-      border-radius: 100px;
-      width: 60px;
-      height: 60px;
-    }
+        .node-image {
+            margin-top: -35px;
+            border-radius: 100px;
+            width: 60px;
+            height: 60px;
+        }
 
-    .node-body {
-      padding: 20px;
-      padding-top: 25px;
-      text-align: center;
-    }
+        .node-body {
+            padding: 20px;
+            padding-top: 25px;
+            text-align: center;
+        }
 
-    .node-footnotes {
-      display: flex;
-      justify-content: space-between;
-      padding-left: 15px;
-      padding-right: 15px;
-    }
+        .node-footnotes {
+            display: flex;
+            justify-content: space-between;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
 
-    /* Container for the top controls */
-    .controls.top {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 1000;
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-    }
+        /* Container for the top controls */
+        .controls.top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+        }
 
-    .controls.bottom {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      /* or space-between as needed */
-      padding: 10px;
-      flex-direction: row;
-    }
+        .controls.bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            /* or space-between as needed */
+            padding: 10px;
+            flex-direction: row;
+        }
 
-    /* Left controls: vertical column */
-    .left-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+        /* Left controls: vertical column */
+        .left-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-    /* Right controls: grid with two rows.
+        /* Right controls: grid with two rows.
      The first row holds the two toggle buttons,
      and the second row is reserved for the dropdown (spanning both columns). */
-    .right-controls {
-      display: grid;
-      grid-template-columns: repeat(2, auto);
-      grid-template-rows: auto auto;
-      gap: 10px;
-    }
+        .right-controls {
+            display: grid;
+            grid-template-columns: repeat(2, auto);
+            grid-template-rows: auto auto;
+            gap: 10px;
+        }
 
-    /* Make the dropdown span both columns */
-    .right-controls .dropdown {
-      grid-column: 1 / -1;
-    }
+        /* Make the dropdown span both columns */
+        .right-controls .dropdown {
+            grid-column: 1 / -1;
+        }
 
-    /* Tooltip Functionality */
-    .node-tooltip {
-      display: none;
-      position: absolute;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 8px;
-      border-radius: 5px;
-      font-size: 14px;
-      white-space: nowrap;
-      z-index: 10;
-      transform: translate(-50%, 150%);
-      left: 50%;
-      top: -10px;
-    }
+        /* Tooltip Functionality */
+        .node-tooltip {
+            display: none;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 10;
+            transform: translate(-50%, 150%);
+            left: 50%;
+            top: -10px;
+        }
 
-    /* Show tooltip when hovering over a node */
-    .node:hover .node-tooltip {
-      display: block;
-    }
-  </style>
+        /* Show tooltip when hovering over a node */
+        .node:hover .node-tooltip {
+            display: block;
+        }
+    </style>
 </head>
 
 <body>
-  <!-- JavaScript files-->
-  <script src="code.js" type="module"></script>
+    <!-- JavaScript files-->
+    <script src="code.js" type="module"></script>
 
-  <!-- d3 Package Install -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+    <!-- d3 Package Install -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
 
-  <div class="controls top">
-    <div class="left-controls">
-      <!-- Sizing and Formatting -->
-      <button onclick="chart.expandAll().fit()">Expand All</button>
-      <button onclick="chart.collapseAll().fit()">Collapse All</button>
+    <div class="controls top">
+        <div class="left-controls">
+            <!-- Sizing and Formatting -->
+            <button onclick="chart.expandAll().fit()">Expand All</button>
+            <button onclick="chart.collapseAll().fit()">Collapse All</button>
 
-      <!-- Searches -->
-      <input type="search" placeholder="search by name" oninput="filterChart(event)" />
-    </div>
-    <div class="right-controls">
-      <!-- Toggle Centering -->
-      <button id="toggle-centering" onclick="toggleCentering()">Disable Centering</button>
+            <!-- Searches -->
+            <input type="search" placeholder="search by name" oninput="filterChart(event)" />
+        </div>
+        <div class="right-controls">
+            <!-- Toggle Centering -->
+            <button id="toggle-centering" onclick="toggleCentering()">Disable Centering</button>
 
-      <!-- Toggle compact -->
-      <button id="toggle-compact" onclick="toggleCompact()">Switch to Compact</button>
+            <!-- Toggle compact -->
+            <button id="toggle-compact" onclick="toggleCompact()">Switch to Compact</button>
 
-      <!-- Toggle Orientation -->
-      <div class="orientation-dropdown">
-        <label for="orientation-dropdown">Orientation Mode:</label>
-        <select id="orientation-dropdown" onchange="toggleOrientation(event)">
+            <!-- Toggle Orientation -->
+            <div class="orientation-dropdown">
+                <label for="orientation-dropdown">Orientation Mode:</label>
+                <select id="orientation-dropdown" onchange="toggleOrientation(event)">
                     <option value="top" selected>Top</option>
                     <option value="bottom">Bottom</option>
                     <option value="left">Left</option>
                     <option value="right">Right</option>
                 </select>
-      </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="chart-container"></div>
+    <div class="chart-container"></div>
 
-  <div class="controls bottom">
-    <button onclick="chart.exportImg()">Export Current</button>
-    <button onclick="chart.exportImg({full:true})">Export Full Chart</button>
-    <button onclick="chart.exportSvg()">Export SVG</button>
-  </div>
+    <div class="controls bottom">
+        <button onclick="chart.exportImg()">Export Current</button>
+        <button onclick="chart.exportImg({full:true})">Export Full Chart</button>
+        <button onclick="chart.exportSvg()">Export SVG</button>
+    </div>
 
-  <script>
-    var chart = null;
+    <script>
+        var chart = null;
 
         let isCenteringEnabled = true;
         let isCompactEnabled = false;
@@ -302,12 +302,13 @@
             const data = chart.data(); // Get chart nodes
             data.forEach((d) => (d._expanded = false)); // Mark all previously expanded nodes for collapse
 
-            // Loop over data and check if input value matches any name
             data.forEach((d) => {
-                if (value != '' && d.name.toLowerCase().includes(value.toLowerCase())) {
-                    // If matches, mark node as highlighted
-                    d._highlighted = true;
-                    d._expanded = true;
+                if (value !== '') { // Create an array of the fields to check
+                    const fields = [d.name, d.description, d.subnoteA, d.subnoteB, d.tooltip];
+                    if (fields.some(field => field && field.toLowerCase().includes(value))) {
+                        d._highlighted = true; // If any field exists and includes the search value, highlight and expand the node
+                        d._expanded = true;
+                    }
                 }
             });
             chart.data(data).render().fit(); // Update data and rerender graph
@@ -330,10 +331,10 @@
             });
             return Math.max(0, totalLines);
         }
-  </script>
+    </script>
 
-  <script type="module">
-    google.script.run.withSuccessHandler(function (data) {
+    <script type="module">
+        google.script.run.withSuccessHandler(function (data) {
 
             var org_data = data.map(item => ({
                 ...item,
@@ -410,10 +411,7 @@
                 .data(org_data)
                 .render();
         }).convertOrgData();
-  </script>
+    </script>
 </body>
 
 </html>
-
-
-

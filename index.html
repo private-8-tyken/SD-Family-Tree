@@ -89,10 +89,13 @@
             const data = chart.data(); // Get chart nodes
             data.forEach((d) => (d._expanded = false)); // Mark all previously expanded nodes for collapse
 
-            data.forEach((d) => { // Loop over data and check if input value matches any name
-                if (value != '' && d.name.toLowerCase().includes(value.toLowerCase())) {
-                    d._highlighted = true; // If matches, mark node as highlighted
-                    d._expanded = true;
+            data.forEach((d) => {
+                if (value !== '') { // Create an array of the fields to check
+                    const fields = [d.name, d.description, d.subnoteA, d.subnoteB, d.tooltip];
+                    if (fields.some(field => field && field.toLowerCase().includes(value))) {
+                        d._highlighted = true; // If any field exists and includes the search value, highlight and expand the node
+                        d._expanded = true;
+                    }
                 }
             });
             chart.data(data).render().fit(); // Update data and rerender graph

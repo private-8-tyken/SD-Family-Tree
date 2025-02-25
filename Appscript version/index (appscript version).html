@@ -178,6 +178,27 @@
         .right-controls .dropdown {
             grid-column: 1 / -1;
         }
+
+        /* Tooltip Functionality */
+        .node-tooltip {
+            display: none;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 10;
+            transform: translate(-50%, 150%);
+            left: 50%;
+            top: -10px;
+        }
+
+        /* Show tooltip when hovering over a node */
+        .node:hover .node-tooltip {
+            display: block;
+        }
     </style>
 </head>
 
@@ -320,6 +341,9 @@
                                 <div > Class: ${node.data.subnoteA} </div>  
                                 <div > Quarter: ${node.data.subnoteB} </div>    
                             </div>
+                            
+                            <!-- Node-specific tooltip -->
+                            <div class="node-tooltip">${node.data.tooltip}</div>
                         </div>     
                     </div>
                 `;

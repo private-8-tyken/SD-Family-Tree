@@ -15,7 +15,7 @@
 
         html,
         body {
-            height: 100%;
+            height: 100vh;
             margin: 0;
         }
 
@@ -269,7 +269,7 @@
             isCompactEnabled = !isCompactEnabled;
             chart.compact(isCompactEnabled).render().fit();
 
-            document.getElementById('toggle-orientation').textContent =
+            document.getElementById('toggle-compact').textContent =
                 isCompactEnabled ? "Switch to Horizontal" : "Switch to Compact";
         }
 
@@ -331,15 +331,13 @@
 
                             <img src=" ${node.data.thumbnail}" class="node-image" style="margin-left:${node.width / 2 - 30}px;" />
 
-                            <div style="margin-right:10px;margin-top:15px;float:right">${node.id}</div>                
-
                             <div class="node-body">
                                 <h3>${node.data.name}</h1>
                                 <h4>${node.data.description}</h4>
                             </div>
                             <div class="node-footnotes">
-                                <div > Class: ${node.data.subnoteA} </div>  
-                                <div > Quarter: ${node.data.subnoteB} </div>    
+                                <div > ${node.data.subnoteA} </div>  
+                                <div > ${node.data.subnoteB} </div>    
                             </div>
                             
                             <!-- Node-specific tooltip -->
@@ -356,3 +354,6 @@
 </body>
 
 </html>
+
+
+

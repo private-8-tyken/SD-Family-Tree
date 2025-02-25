@@ -1,48 +1,40 @@
-export const org_data = [
-    {
-        name: 'name1',
-        id: 0,
-        parent: null,
-        child: 1,
-        description: 'Tester 111 test', // optional
-        subnoteA: "Alpha",
-        subnoteB: "2004",
-        tooltip: 'name1', // optional
-        color: '#db4073', // optional
-        thumbnail: null // optional
-    },
-    {
-        name: 'name2',
-        id: 1,
-        parent: 0,
-        child: null,
-        description: 'Tester 111 test', // optional
-        subnoteA: '',
-        tooltip: 'name1', // optional
-        color: 'blue', // optional
-        thumbnail: null // optional
-    },
-    {
-        name: 'name3',
-        id: 2,
-        parent: 0,
-        child: 3,
-        description: 'Tester 111 test', // optional
-        tooltip: 'name1', // optional
-        color: '#db4073', // optional
-        thumbnail: null // optional
-    },
-    {
-        name: 'name4',
-        id: 3,
-        parent: 2,
-        child: null,
-        description: 'Tester 111 test', // optional
-        tooltip: 'name1', // optional
-        color: '#db4073', // optional
-        thumbnail: null // optional
-    }
-];
-
-console.log(org_data);
-console.log(org_data[0]);
+function doGet(e) {
+    Logger.log(e.parameter);
+    return HtmlService.createHtmlOutputFromFile("index.html")
+  }
+  
+  function getData() {
+    return convertOrgData();
+  }
+  
+  function convertOrgData() {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("Org Chart Inputs");
+    var lastRow = sheet.getLastRow();
+    // Get all data starting at row 2 (skipping headers) in columns A to I.
+    var rawData = sheet.getRange("A2:I" + lastRow).getValues();
+  
+    var data = rawData.filter(function(row) {
+      return row[0].toString().trim() !== "";
+    });
+  
+    // Map each row to an object. Adjust the conversion as needed (e.g. empty cells become null).
+    var orgData = data.map(function(row) {
+      return {
+        name: row[0],
+        id: row[1],
+        parent: (row[2] == "" ? null : row[2]),
+        description: row[3],
+        subnoteA: row[4],
+        subnoteB: row[5],
+        tooltip: row[6],
+        color: row[7],
+        thumbnail: (row[8] == "" ? null : row[8]),
+      };
+    });
+  
+    // Output the resulting array (for example, log it)
+    Logger.log(JSON.stringify(orgData, null, 2));
+  
+    return orgData;
+  }

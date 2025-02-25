@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
 
-    <div class="top-controls">
+    <div class="controls top">
         <div class="left-controls">
             <!-- Sizing and Formatting -->
             <button onclick="chart.expandAll().fit()">Expand All</button>
@@ -50,12 +50,11 @@
 
     <div class="chart-container"></div>
 
-    <div class="top-controls"><div class="left-controls">
+    <div class="controls bottom">
         <button onclick="chart.exportImg()">Export Current</button>
-        <button onclick="chart.exportImg({full:true})">Export Full</button>
+        <button onclick="chart.exportImg({full:true})">Export Full Chart</button>
         <button onclick="chart.exportSvg()">Export SVG</button>
-        <button onclick="downloadPdf(chart)">Export PDF</button>
-    </div></div>
+    </div>
 
     <script>
         var chart = null;
@@ -75,7 +74,7 @@
             isCompactEnabled = !isCompactEnabled;
             chart.compact(isCompactEnabled).render().fit();
 
-            document.getElementById('toggle-orientation').textContent =
+            document.getElementById('toggle-compact').textContent =
                 isCompactEnabled ? "Switch to Horizontal" : "Switch to Compact";
         }
 
@@ -143,8 +142,8 @@
                                 <h4>${node.data.description}</h4>
                             </div>
                             <div class="node-footnotes">
-                                <div > Class: ${node.data.subnoteA} </div>  
-                                <div > Quarter: ${node.data.subnoteB} </div>    
+                                <div > ${node.data.subnoteA} </div>  
+                                <div > ${node.data.subnoteB} </div>    
                             </div>
 
                             <!-- Node-specific tooltip -->

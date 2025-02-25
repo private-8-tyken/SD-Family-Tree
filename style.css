@@ -3,11 +3,11 @@
     --shadow-dark: 0 4px 10px rgba(0, 0, 0, 0.8);
 }
 
-html,
-body {
+html, body {
     height: 100%;
     margin: 0;
-}
+    position: relative;
+  }
 
 body {
     display: flex;
@@ -36,10 +36,14 @@ h4 {
 }
 
 .chart-container {
-    min-height: 400px;
-    flex: 1;
+    position: absolute;
+    height: fit-content;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
-}
+  }
 
 /* ----Button Styling---- https://getcssscan.com/css-buttons-examples button 56*/
 button,
@@ -139,12 +143,27 @@ button:hover {
 }
 
 /* Container for the top controls */
-.top-controls {
+.controls.top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin: 10px;
-    /* Adjust as needed */
+    padding: 10px;
+}
+
+.controls.bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: center; /* or space-between as needed */
+    padding: 10px;
+    flex-direction: row;
 }
 
 /* Left controls: vertical column */

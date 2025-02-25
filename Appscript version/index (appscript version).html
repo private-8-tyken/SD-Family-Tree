@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Org Chart Page</title>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+
+    <style>
+        :root {
+            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.5);
+            --shadow-dark: 0 4px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ----Headers---- */
+        h1,
+        h2,
+        h3,
+        h4,
+        h5 {
+            margin: 0;
+            color: black;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        h4 {
+            font-size: 16px;
+            margin-top: 2px;
+            font-weight: lighter;
+        }
+
+        .chart-container {
+            min-height: 400px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ----Button Styling---- https://getcssscan.com/css-buttons-examples button 56*/
+        button,
+        input,
+        .orientation-dropdown {
+            margin: 0.5rem;
+            align-items: center;
+            background-color: #fee6e3;
+            border: 2px solid #111;
+            border-radius: 8px;
+            box-sizing: border-box;
+            color: #111;
+            cursor: pointer;
+            display: inline-flex;
+            font-size: 16px;
+            height: 48px;
+            line-height: 24px;
+            max-width: 100%;
+            padding: 0 25px;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        button:after,
+        input:after,
+        .orientation-dropdown:after {
+            background-color: #111;
+            border-radius: 8px;
+            content: "";
+            display: block;
+            height: 48px;
+            left: 0;
+            width: 100%;
+            position: absolute;
+            top: -2px;
+            transform: translate(8px, 8px);
+            transition: transform .2s ease-out;
+            z-index: -1;
+        }
+
+        button:hover:after {
+            transform: translate(0, 0);
+        }
+
+        button:active {
+            background-color: #ffdeda;
+            outline: 0;
+        }
+
+        button:hover {
+            outline: 0;
+        }
+
+        @media (min-width: 768px) {
+            button {
+                padding: 0 40px;
+            }
+        }
+
+        /* ----Node Styling---- */
+        .node-container {
+            padding-top: 20px;
+            background-color: none;
+            margin-left: 1px;
+            border-radius: 2px;
+            overflow: visible;
+        }
+
+        .node {
+            padding-top: 0px;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .node:hover {
+            box-shadow: var(--shadow-dark);
+        }
+
+        .node-image {
+            margin-top: -35px;
+            border-radius: 100px;
+            width: 60px;
+            height: 60px;
+        }
+
+        .node-body {
+            padding: 20px;
+            padding-top: 25px;
+            text-align: center;
+        }
+
+        .node-footnotes {
+            display: flex;
+            justify-content: space-between;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        /* Container for the top controls */
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 10px;
+            /* Adjust as needed */
+        }
+
+        /* Left controls: vertical column */
+        .left-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Right controls: grid with two rows.
+     The first row holds the two toggle buttons,
+     and the second row is reserved for the dropdown (spanning both columns). */
+        .right-controls {
+            display: grid;
+            grid-template-columns: repeat(2, auto);
+            grid-template-rows: auto auto;
+            gap: 10px;
+        }
+
+        /* Make the dropdown span both columns */
+        .right-controls .dropdown {
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- JavaScript files-->
+    <script src="code.gs" type="module"></script>
+
+    <!-- d3 Package Install -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+
+    <div class="top-controls">
+        <div class="left-controls">
+            <!-- Sizing and Formatting -->
+            <button onclick="chart.expandAll().fit()">Expand All</button>
+            <button onclick="chart.collapseAll().fit()">Collapse All</button>
+
+            <!-- Searches -->
+            <input type="search" placeholder="search by name" oninput="filterChart(event)" />
+        </div>
+        <div class="right-controls">
+            <!-- Toggle Centering -->
+            <button id="toggle-centering" onclick="toggleCentering()">Disable Centering</button>
+
+            <!-- Toggle compact -->
+            <button id="toggle-compact" onclick="toggleCompact()">Switch to Compact</button>
+
+            <!-- Toggle Orientation -->
+            <div class="orientation-dropdown">
+                <label for="orientation-dropdown">Orientation Mode:</label>
+                <select id="orientation-dropdown" onchange="toggleOrientation(event)">
+                    <option value="top" selected>Top</option>
+                    <option value="bottom">Bottom</option>
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container"></div>
+
+    <div class="top-controls">
+        <div class="left-controls">
+            <button onclick="chart.exportImg()">Export Current</button>
+            <button onclick="chart.exportImg({full:true})">Export Full</button>
+            <button onclick="chart.exportSvg()">Export SVG</button>
+            <button onclick="downloadPdf(chart)">Export PDF</button>
+        </div>
+    </div>
+
+    <script>
+        var chart = null;
+
+        let isCenteringEnabled = true;
+        let isCompactEnabled = false;
+
+        function toggleCentering() {
+            isCenteringEnabled = !isCenteringEnabled;
+            chart.setActiveNodeCentered(isCenteringEnabled).render();
+
+            document.getElementById('toggle-centering').textContent =
+                isCenteringEnabled ? "Disable Centering" : "Enable Centering";
+        }
+
+        function toggleCompact() {
+            isCompactEnabled = !isCompactEnabled;
+            chart.compact(isCompactEnabled).render().fit();
+
+            document.getElementById('toggle-orientation').textContent =
+                isCompactEnabled ? "Switch to Horizontal" : "Switch to Compact";
+        }
+
+        function toggleOrientation(event) {
+            const selectedLayout = event.target.value;
+            chart.layout(selectedLayout).render().fit();
+        }
+
+        function filterChart(e) {
+            const value = e.srcElement.value; // Get input value
+            chart.clearHighlighting(); // Clear previous higlighting
+            const data = chart.data(); // Get chart nodes
+            data.forEach((d) => (d._expanded = false)); // Mark all previously expanded nodes for collapse
+
+            // Loop over data and check if input value matches any name
+            data.forEach((d) => {
+                if (value != '' && d.name.toLowerCase().includes(value.toLowerCase())) {
+                    // If matches, mark node as highlighted
+                    d._highlighted = true;
+                    d._expanded = true;
+                }
+            });
+            chart.data(data).render().fit(); // Update data and rerender graph
+            console.log('filtering chart', e.srcElement.value);
+        }
+    </script>
+
+    <script type="module">
+        google.script.run.withSuccessHandler(function (data) {
+            var org_data = data;
+            console.log(org_data);
+
+            chart = new d3.OrgChart()
+                .nodeId((node) => node.id)
+                .parentNodeId((node) => node.parent)
+                .nodeWidth((node) => 250) // Control Width
+                .initialZoom(0.7)
+                .nodeHeight((node) => 180) // Control Height
+                .childrenMargin((node) => 40)
+                .compactMarginBetween((node) => 15)
+                .compactMarginPair((node) => 80)
+                .linkUpdate(function (d, i, arr) {
+                    d3.select(this)
+                        .attr('stroke', (d) =>
+                            d.data._upToTheRootHighlighted ? 'black' : 'grey'
+                        )
+                        .attr('stroke-width', (d) =>
+                            d.data._upToTheRootHighlighted ? 15 : 1.5
+                        );
+
+                    if (d.data._upToTheRootHighlighted) {
+                        d3.select(this).raise();
+                    }
+                })
+                .nodeContent((node) => {
+                    return `
+                    <div class="node-container" style="height:${node.height}px">
+                        <div class="node" style="height:${node.height - 32}px;border:2px solid ${node.data.color};border-top: 10px solid ${node.data.color};">
+
+                            <img src=" ${node.data.thumbnail}" class="node-image" style="margin-left:${node.width / 2 - 30}px;" />
+
+                            <div style="margin-right:10px;margin-top:15px;float:right">${node.id}</div>                
+
+                            <div class="node-body">
+                                <h3>${node.data.name}</h1>
+                                <h4>${node.data.description}</h4>
+                            </div>
+                            <div class="node-footnotes">
+                                <div > Class: ${node.data.subnoteA} </div>  
+                                <div > Quarter: ${node.data.subnoteB} </div>    
+                            </div>
+                        </div>     
+                    </div>
+                `;
+                })
+                .container('.chart-container')
+                .data(org_data)
+                .render();
+        }).getData();
+    </script>
+</body>
+
+</html>

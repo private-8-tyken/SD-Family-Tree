@@ -16,8 +16,8 @@ export const data = [
         id: 1,
         parent: 0,
         child: null,
-        description: 'Tester 111 test', // optional
-        subnoteB: "Year",
+        description: 'Nabby Nab', // optional
+        subnoteB: "Year:\n2011 Fall",
         tooltip: 'name1', // optional
         color: 'blue', // optional
         thumbnail: null // optional

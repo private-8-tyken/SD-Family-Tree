@@ -89,11 +89,9 @@
             const data = chart.data(); // Get chart nodes
             data.forEach((d) => (d._expanded = false)); // Mark all previously expanded nodes for collapse
 
-            // Loop over data and check if input value matches any name
-            data.forEach((d) => {
+            data.forEach((d) => { // Loop over data and check if input value matches any name
                 if (value != '' && d.name.toLowerCase().includes(value.toLowerCase())) {
-                    // If matches, mark node as highlighted
-                    d._highlighted = true;
+                    d._highlighted = true; // If matches, mark node as highlighted
                     d._expanded = true;
                 }
             });
@@ -103,19 +101,49 @@
 
         function countLineBreaks(text, containerWidth, font) {
             font = font + "px sans-serif";
-
             if (!text) return 0;
+
             const canvas = document.createElement("canvas"); // Create a temporary canvas for measurement.
             const ctx = canvas.getContext("2d");
             ctx.font = font;
 
-            const segments = text.split(/<br>/gi); // Split the text by <br> tags.
+            const segments = text.split(/<br>/gi);
             let totalLines = 0;
+
             segments.forEach(segment => {
-                const measuredWidth = ctx.measureText(segment).width; // Measure the pixel width of this segment.
-                totalLines += Math.ceil(measuredWidth / containerWidth); // Number of lines this segment will span
+                segment = segment.trim(); // Trim leading/trailing whitespace.
+
+                if (segment === "") { // If the segment is empty (e.g. consecutive <br>s), count it as one line.
+                    totalLines++;
+                    return;
+                }
+
+                const words = segment.split(/\s+/); // Split the segment into words.
+                let currentLine = "";
+                let linesCount = 0;
+
+                words.forEach(word => {
+                    // If the current line is empty, start with the current word.
+                    if (currentLine === "") {
+                        currentLine = word;
+                    } else {
+                        const testLine = currentLine + " " + word; // Prepare the line with a space and the new word.
+                        const measuredWidth = ctx.measureText(testLine).width;
+
+                        if (measuredWidth > containerWidth) { // If adding this word exceeds the container width, commit the current line.
+                            linesCount++;
+                            currentLine = word; // Start a new line with the current word.
+                        } else {
+                            currentLine = testLine; // Otherwise, update the current line.
+                        }
+                    }
+                });
+
+                if (currentLine !== "") { linesCount++; } // Count the last line if it has content.
+                totalLines += linesCount;
             });
-            return Math.max(0, totalLines);
+            console.log(text, totalLines);
+            return totalLines;
         }
     </script>
 
@@ -185,7 +213,7 @@
                             </div>
 
                             <!-- Node-specific tooltip -->
-                            <div class="node-tooltip">${node.data.tooltip}</div>
+                            <div class="node-tooltip" style="transform: translate(20%, ${node.height}px);">${node.data.tooltip}</div>
                         </div>
                     </div>
                 `;

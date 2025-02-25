@@ -201,7 +201,6 @@ button:hover {
     font-size: 14px;
     white-space: nowrap;
     z-index: 10;
-    transform: translate(-50%, 150%);
     left: 50%;
     top: -10px;
 }

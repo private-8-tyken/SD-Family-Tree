@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Org Chart Page</title>
-    <!-- <link rel="stylesheet" href="style.css"> -->
-
     <style>
         :root {
             --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.5);
@@ -15,8 +13,9 @@
 
         html,
         body {
-            height: 100vh;
+            height: 100%;
             margin: 0;
+            position: relative;
         }
 
         body {
@@ -46,8 +45,12 @@
         }
 
         .chart-container {
-            min-height: 400px;
-            flex: 1;
+            position: absolute;
+            height: fit-content;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             overflow: hidden;
         }
 
@@ -149,12 +152,28 @@
         }
 
         /* Container for the top controls */
-        .top-controls {
+        .controls.top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin: 10px;
-            /* Adjust as needed */
+            padding: 10px;
+        }
+
+        .controls.bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            /* or space-between as needed */
+            padding: 10px;
+            flex-direction: row;
         }
 
         /* Left controls: vertical column */
@@ -203,15 +222,12 @@
 </head>
 
 <body>
-    <!-- JavaScript files-->
-    <script src="code.gs" type="module"></script>
-
     <!-- d3 Package Install -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
 
-    <div class="top-controls">
+    <div class="controls top">
         <div class="left-controls">
             <!-- Sizing and Formatting -->
             <button onclick="chart.expandAll().fit()">Expand All</button>
@@ -242,13 +258,10 @@
 
     <div class="chart-container"></div>
 
-    <div class="top-controls">
-        <div class="left-controls">
-            <button onclick="chart.exportImg()">Export Current</button>
-            <button onclick="chart.exportImg({full:true})">Export Full</button>
-            <button onclick="chart.exportSvg()">Export SVG</button>
-            <button onclick="downloadPdf(chart)">Export PDF</button>
-        </div>
+    <div class="controls bottom">
+        <button onclick="chart.exportImg()">Export Current</button>
+        <button onclick="chart.exportImg({full:true})">Export Full Chart</button>
+        <button onclick="chart.exportSvg()">Export SVG</button>
     </div>
 
     <script>
@@ -326,34 +339,31 @@
                 })
                 .nodeContent((node) => {
                     return `
-                    <div class="node-container" style="height:${node.height}px">
-                        <div class="node" style="height:${node.height - 32}px;border:2px solid ${node.data.color};border-top: 10px solid ${node.data.color};">
+                        <div class="node-container" style="height:${node.height}px">
+                            <div class="node" style="height:${node.height - 32}px;border:2px solid ${node.data.color};border-top: 10px solid ${node.data.color};">
 
-                            <img src=" ${node.data.thumbnail}" class="node-image" style="margin-left:${node.width / 2 - 30}px;" />
+                                <img src=" ${node.data.thumbnail}" class="node-image" style="margin-left:${node.width / 2 - 30}px;" />
 
-                            <div class="node-body">
-                                <h3>${node.data.name}</h1>
-                                <h4>${node.data.description}</h4>
+                                <div class="node-body">
+                                    <h3>${node.data.name}</h1>
+                                    <h4>${node.data.description}</h4>
+                                </div>
+                                <div class="node-footnotes">
+                                    <div > ${node.data.subnoteA} </div>
+                                    <div > ${node.data.subnoteB} </div>
+                                </div>
+
+                                <!-- Node-specific tooltip -->
+                                <div class="node-tooltip">${node.data.tooltip}</div>
                             </div>
-                            <div class="node-footnotes">
-                                <div > ${node.data.subnoteA} </div>  
-                                <div > ${node.data.subnoteB} </div>    
-                            </div>
-                            
-                            <!-- Node-specific tooltip -->
-                            <div class="node-tooltip">${node.data.tooltip}</div>
-                        </div>     
-                    </div>
-                `;
+                        </div>
+                    `;
                 })
                 .container('.chart-container')
                 .data(org_data)
                 .render();
-        }).getData();
+        }).convertOrgData();
     </script>
 </body>
 
 </html>
-
-
-

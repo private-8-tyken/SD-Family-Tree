@@ -92,7 +92,7 @@
             data.forEach((d) => {
                 if (value !== '') { // Create an array of the fields to check
                     const fields = [d.name, d.description, d.subnoteA, d.subnoteB, d.tooltip];
-                    if (fields.some(field => field && field.toLowerCase().includes(value))) {
+                    if (fields.some(field => field && field.toLowerCase().includes(value.toLowerCase()))) {
                         d._highlighted = true; // If any field exists and includes the search value, highlight and expand the node
                         d._expanded = true;
                     }

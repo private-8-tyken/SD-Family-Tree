@@ -1,211 +1,70 @@
-:root {
-    --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.5);
-    --shadow-dark: 0 4px 10px rgba(0, 0, 0, 0.8);
-}
-
-html, body {
-    height: 100%;
-    margin: 0;
-    position: relative;
-    font-family: Inter, sans-serif;
-    font-size: 16px;
-  }
-
+/*CSS*/
+html,
 body {
-    display: flex;
-    flex-direction: column;
-}
-
-/* ----Headers---- */
-h1,
-h2,
-h3,
-h4,
-h5 {
+    width: 100%;
+    height: 100%;
+    padding: 0;
     margin: 0;
-    color: black;
-}
-
-h3 {
-    font-size: 16px;
-    font-weight: bold;
-}
-
-h4 {
-    font-size: 16px;
-    margin-top: 2px;
-    font-weight: normal;
-    font-style: italic;
-}
-
-.chart-container {
-    position: absolute;
-    height: fit-content;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     overflow: hidden;
-  }
+    font-family: Helvetica;
+}
 
-/* ----Button Styling---- https://getcssscan.com/css-buttons-examples button 56*/
-button,
-input,
-.orientation-dropdown {
-    margin: 0.5rem;
-    align-items: center;
-    background-color: #fee6e3;
-    border: 2px solid #111;
-    border-radius: 8px;
+#tree {
+    width: 100%;
+    height: 100%;
+}
+
+.mini-map {
+    bottom: 45px !important;
+}
+
+/* Text Area */
+.bft-dark textarea,
+.bft-light textarea {
+    font: 16px Helvetica, "Segoe UI", Arial, sans-serif;
+}
+
+.bft-input>textarea {
+    height: 50px;
+    padding: 18px 10px 2px 9px;
+    width: 100%;
     box-sizing: border-box;
-    color: #111;
-    cursor: pointer;
-    display: inline-flex;
-    font-size: 16px;
-    height: 48px;
-    line-height: 24px;
-    max-width: 100%;
-    padding: 0 25px;
-    position: relative;
-    touch-action: manipulation;
+    border-style: solid;
+    border-width: 1px
 }
 
-button:after,
-input:after,
-.orientation-dropdown:after {
-    background-color: #111;
-    border-radius: 8px;
-    content: "";
-    display: block;
-    height: 48px;
-    left: 0;
-    width: 100%;
-    position: absolute;
-    top: -2px;
-    transform: translate(8px, 8px);
-    transition: transform .2s ease-out;
-    z-index: -1;
+[data-bft-input-disabled].bft-input>textarea {
+    border-color: transparent !important
 }
 
-button:hover:after {
-    transform: translate(0, 0);
-}
-
-button:active {
-    background-color: #ffdeda;
+.bft-input>textarea {
     outline: 0;
+    border-radius: 5px
 }
 
-button:hover {
-    outline: 0;
+.bft-dark .bft-input>textarea {
+    color: #ccc;
+    background-color: #333;
+    border-color: #5b5b5b
 }
 
-@media (min-width: 768px) {
-    button {
-        padding: 0 40px;
-    }
+.bft-light .bft-input>textarea {
+    color: #757575;
+    background-color: #fff;
+    border-color: #c7c7c7
 }
 
-/* ----Node Styling---- */
-.node-container {
-    padding-top: 20px;
-    background-color: none;
-    margin-left: 1px;
-    border-radius: 2px;
-    overflow: visible;
+.bft-light .bft-input>textarea:focus {
+    border-color: #039be5;
+    background-color: #f8f9f9
 }
 
-.node {
-    padding-top: 0px;
-    box-shadow: var(--shadow-light);
-    transition: all 0.3s ease;
+.bft-dark .bft-input>textarea:focus {
+    border-color: #039be5;
+    background-color: #3c3c3c
 }
 
-.node:hover {
-    box-shadow: var(--shadow-dark);
-}
-
-.node-image {
-    margin-top: -35px;
-    border-radius: 100px;
-    width: 60px;
-    height: 60px;
-}
-
-.node-body {
-    padding: 20px;
-    padding-top: 25px;
-    text-align: center;
-}
-
-.node-footnotes {
-    display: flex;
-    justify-content: space-between;
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
-/* Container for the top controls */
-.controls.top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-}
-
-.controls.bottom {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    display: flex;
-    justify-content: center; /* or space-between as needed */
-    padding: 10px;
-    flex-direction: row;
-}
-
-/* Left controls: vertical column */
-.left-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* Right controls: grid with two rows.
-     The first row holds the two toggle buttons,
-     and the second row is reserved for the dropdown (spanning both columns). */
-.right-controls {
-    display: grid;
-    grid-template-columns: repeat(2, auto);
-    grid-template-rows: auto auto;
-    gap: 10px;
-}
-
-/* Make the dropdown span both columns */
-.right-controls .dropdown {
-    grid-column: 1 / -1;
-}
-
-/* Tooltip Functionality */
-.node-tooltip {
-    position: absolute;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 8px;
-    border-radius: 5px;
-    font-size: 14px;
-    white-space: nowrap;
-    z-index: 10;
-    left: 50%;
-    top: -10px;
-}
-
-/* Show tooltip when hovering over a node */
-.node:hover .node-tooltip {
-    display: block;
+.bft-dark .bft-input>textarea.bft-validation-error,
+.bft-light .bft-input>textarea.bft-validation-error {
+    border-color: #ca2a2a
 }

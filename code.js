@@ -1,35 +1,32 @@
 import { data } from './data.js'
 
 FamilyTree.templates.base.defs =
-    `<g transform="matrix(0.05,0,0,0.05,-12,-9)" id="heart">
-        <path fill="#aeaeae" d="M438.482,58.61c-24.7-26.549-59.311-41.655-95.573-41.711c-36.291,0.042-70.938,15.14-95.676,41.694l-8.431,8.909  l-8.431-8.909C181.284,5.762,98.663,2.728,45.832,51.815c-2.341,2.176-4.602,4.436-6.778,6.778 c-52.072,56.166-52.072,142.968,0,199.134l187.358,197.581c6.482,6.843,17.284,7.136,24.127,0.654 c0.224-0.212,0.442-0.43,0.654-0.654l187.29-197.581C490.551,201.567,490.551,114.77,438.482,58.61z"/>
+    `
+        <g id="base_node_menu" style="cursor:pointer;">
+            <rect x="0" y="0" fill="transparent" width="22" height="22"></rect>
+            <circle cx="4" cy="11" r="2" fill="#b1b9be"></circle>
+            <circle cx="11" cy="11" r="2" fill="#b1b9be"></circle>
+            <circle cx="18" cy="11" r="2" fill="#b1b9be"></circle>
         </g>
-     <g transform="matrix(1,0,0,1,0,0)" id="dot"></g>
-      <g id="base_node_menu" style="cursor:pointer;">
-          <rect x="0" y="0" fill="transparent" width="22" height="22"></rect>
-          <circle cx="4" cy="11" r="2" fill="#b1b9be"></circle>
-          <circle cx="11" cy="11" r="2" fill="#b1b9be"></circle>
-          <circle cx="18" cy="11" r="2" fill="#b1b9be"></circle>
-      </g>
-      <g style="cursor: pointer;" id="base_tree_menu">
-          <rect x="0" y="0" width="25" height="25" fill="transparent"></rect>
-          ${FamilyTree.icon.addUser(25, 25, '#fff', 0, 0)}
-      </g>
-      <g style="cursor: pointer;" id="base_tree_menu_close">
-          <circle cx="12.5" cy="12.5" r="12" fill="#F57C00"></circle>
-          ${FamilyTree.icon.close(25, 25, '#fff', 0, 0)}
-      </g>            
-      <g id="base_up">
-          <circle cx="115" cy="30" r="15" fill="#fff" stroke="#b1b9be" stroke-width="1"></circle>
-          ${FamilyTree.icon.ft(20, 80, '#b1b9be', 105, -10)}
-      </g>
-      <clipPath id="base_img_0">
+        <g style="cursor: pointer;" id="base_tree_menu">
+            <rect x="0" y="0" width="25" height="25" fill="transparent"></rect>
+            ${FamilyTree.icon.addUser(25, 25, '#fff', 0, 0)}
+        </g>
+        <g style="cursor: pointer;" id="base_tree_menu_close">
+            <circle cx="12.5" cy="12.5" r="12" fill="#F57C00"></circle>
+            ${FamilyTree.icon.close(25, 25, '#fff', 0, 0)}
+        </g>            
+        <g id="base_up">
+            <circle cx="115" cy="30" r="15" fill="#fff" stroke="#b1b9be" stroke-width="1"></circle>
+            ${FamilyTree.icon.ft(20, 80, '#b1b9be', 105, -10)}
+        </g>
+        <clipPath id="base_img_0">
         <circle id="base_img_0_stroke" cx="45" cy="62" r="35"/>
-      </clipPath>
-      <clipPath id="base_img_1">
+        </clipPath>
+        <clipPath id="base_img_1">
         <circle id="base_img_1_stroke" cx="100" cy="62" r="35"/>
-      </clipPath>
-      `;
+        </clipPath>
+    `;
 
 FamilyTree.templates.main = Object.assign({}, FamilyTree.templates.base);
 FamilyTree.templates.main.defs = `<style>
@@ -153,13 +150,6 @@ FamilyTree.elements.textarea = function (e, t, i, r) {
     }
 }
 
-let persons = data.map(item => ({
-    value: item.id,
-    text: item.name
-}));
-
-console.log(persons);
-
 var family = new FamilyTree(document.getElementById("tree"), {
     template: "main",
     scaleInitial: FamilyTree.match.boundary,
@@ -228,6 +218,7 @@ var family = new FamilyTree(document.getElementById("tree"), {
         }
     },
     orderBy: "orderId",
+    //filterBy: ['gender', 'city'], // FILTER FUNCTION TO BE ADDED
     tags: {
         "single_male": {
             template: "single_male"
@@ -246,15 +237,20 @@ var family = new FamilyTree(document.getElementById("tree"), {
         },
         "family_single_male": {
             template: "family_single_male"
+        },
+        filter: {
+            template: 'dot'
         }
     }
 });
 
+/*
 family.on('render-link', function (sender, args) {
     if (args.cnode.ppid != undefined) {
         args.html += '<use xlink:href="#heart" x="' + args.p.xa + '" y="' + args.p.ya + '"/>';
     }
 });
+*/
 
 family.on('field', function (sender, args) {
     if (args.name == "bdate") {

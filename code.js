@@ -128,6 +128,16 @@ FamilyTree.templates.family_single_male.link = '<path stroke-linejoin="round" st
 FamilyTree.templates.family_single_female = Object.assign({}, FamilyTree.templates.single_female);
 FamilyTree.templates.family_single_female.link = '<path stroke-linejoin="round" stroke="#aeaeae" stroke-width="2px" fill="none" d="{rounded}" />';
 
+// Custom Pointer
+FamilyTree.templates.main.pointer =
+    `<g data-pointer="pointer" transform="matrix(0,0,0,0,100,100)">><g transform="matrix(0.3,0,0,0.3,-17,-17)">'
+    + '<polygon fill="rgb(255, 202, 40)" points="53.004,173.004 53.004,66.996 0,120" />'
+    + '<polygon fill="rgb(255, 202, 40)" points="186.996,66.996 186.996,173.004 240,120" />'
+    + '<polygon fill="rgb(255, 202, 40)" points="66.996,53.004 173.004,53.004 120,0" />'
+    + '<polygon fill="rgb(255, 202, 40)" points="120,240 173.004,186.996 66.996,186.996" />'
+    + '<circle fill="rgb(255, 202, 40)" cx="120" cy="120" r="30" />'
+    + '</g></g>`;
+
 // Custom Functionality
 FamilyTree.elements.textarea = function (e, t, i, r) {
     var a = FamilyTree.elements._vidrf(e, t, r);
@@ -228,7 +238,7 @@ var family = new FamilyTree(document.getElementById("tree"), {
         }
     },
     orderBy: "orderId",
-    //filterBy: ['gender', 'city'], // FILTER FUNCTION TO BE ADDED
+    filterBy: ['relationship'], // FILTER FUNCTION TO BE ADDED
     tags: {
         "single_male": {
             template: "single_male"
@@ -261,6 +271,38 @@ family.on('render-link', function (sender, args) {
     }
 });
 */
+
+family.on("updated", function (sender, args) {
+    try {
+        var orginalNode = family.get(args.updateNodesData[0].id);
+        orginalNode.tags = [];
+
+        family.updateNode(orginalNode, function () {
+            console.log('Node Updated:', orginalNode);
+        });
+    } catch {
+        console.log('No original node');
+    }
+
+    try {
+        var addedNodes = args.addNodesData;
+
+        for (var i = 0; i < addedNodes.length; i++) {
+            var node = addedNodes[i];
+            if (node.hasOwnProperty("mid") || node.hasOwnProperty("fid")) {
+                var childNode = family.get(node.id);
+                childNode.tags = childNode.gender == 'male' ? ['family_single_male'] : ['family_single_female'];
+
+                family.updateNode(childNode, function () {
+                    console.log('Node Updated:', childNode);
+                });
+            }
+        }
+    } catch {
+        console.log('No child node')
+    }
+});
+
 
 family.on('field', function (sender, args) {
     if (args.name == "bdate") {

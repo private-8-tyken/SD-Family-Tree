@@ -109,7 +109,7 @@ FamilyTree.templates.single.field_0 = '<text ' + FamilyTree.attr.width + ' ="160
 FamilyTree.templates.single.field_1 = '<text ' + FamilyTree.attr.width + ' ="190" data-text-overflow="multiline" style="font-size: 16px;" fill="black" x="100" y="135" text-anchor="middle">{val}</text>';
 FamilyTree.templates.single.field_3 =
     '<text ' + FamilyTree.attr.width + ' ="60" style="font-size: 12px;" fill="black" x="100" y="180" text-anchor="middle">{val}</text>';
-// FamilyTree.templates.single.nodeMenuButton = `<use ${FamilyTree.attr.control_node_menu_id}="{id}" x="89" y="5" xlink:href="#base_node_menu" />`;
+FamilyTree.templates.single.nodeMenuButton = `<use ${FamilyTree.attr.control_node_menu_id}="{id}" x="89" y="5" xlink:href="#base_node_menu" />`;
 FamilyTree.templates.single_male = Object.assign({}, FamilyTree.templates.single);
 FamilyTree.templates.single_male.node = '<circle cx="100" cy="100" r="100" fill="white" stroke-width="3" stroke="#6bb4df" ></circle>';
 FamilyTree.templates.single_male.img_0 =
@@ -150,38 +150,27 @@ FamilyTree.elements.textarea = function (e, t, i, r) {
     }
 }
 
-FamilyTree.templates.main.nodeCircleMenuButton =
-    FamilyTree.templates.main_male.nodeCircleMenuButton =
-    FamilyTree.templates.main_male_child.nodeCircleMenuButton =
-    FamilyTree.templates.single_male.nodeCircleMenuButton =
-    FamilyTree.templates.family_single_male.nodeCircleMenuButton =
-    FamilyTree.templates.main_female.nodeCircleMenuButton =
-    FamilyTree.templates.main_female_child.nodeCircleMenuButton =
-    FamilyTree.templates.single_female.nodeCircleMenuButton =
-    FamilyTree.templates.family_single_female.nodeCircleMenuButton = {
-        radius: 20,
-        x: 230,
-        y: 100,
-        color: '#fff',
-        stroke: '#aeaeae'
-    };
-
-/// PRIMARY LOADING ///
 var family = new FamilyTree(document.getElementById("tree"), {
     template: "main",
     scaleInitial: FamilyTree.match.boundary,
-    nodeCircleMenu: {
-        pet: {
-            icon: FamilyTree.icon.teddy(30, 30, '#aeaeae'),
-            text: "Add pet",
-            color: "white"
-        }
+    //nodeTreeMenu: true,
+    miniMap: true,
+    nodeMenu: {
+        showTreeMenu: {
+            icon: FamilyTree.icon.addUser(30, 30, '#aeaeae'),
+            text: "Add Person",
+            color: "white",
+            onClick: function (nodeId) {
+                family.showTreeMenu(nodeId);
+            }
+        },
+        remove: { text: "Delete Person" }
     },
     nodeBinding: {
         field_0: "relationship",
         field_1: "name",
         field_2: "bdate",
-        // field_3: "id",
+        //field_3: "id",
         img_0: "photo",
     },
     editForm: {
@@ -209,8 +198,8 @@ var family = new FamilyTree(document.getElementById("tree"), {
                 { type: 'select', label: 'Country', binding: 'country' }, //options: [{ value: 'bg', text: 'Bulgaria' }, { value: 'ru', text: 'Russia' }, { value: 'gr', text: 'Greece' }], label: 'Country', binding: 'country' }
                 { type: 'textbox', label: 'City', binding: 'city' }
             ],
-            { type: 'textbox', label: 'Photo Url', binding: 'photo', btn: 'Upload' },
             [
+                { type: 'textbox', label: 'Photo Url', binding: 'photo', btn: 'Upload' },
                 { type: 'textbox', label: 'ID', binding: 'id' },
                 { type: 'textbox', label: 'Divorced?', binding: 'divorced' }
             ],
@@ -293,85 +282,6 @@ family.on('render-link', function (sender, args) {
         console.log(args.html);
         args.html = args.html.replace("path", "path stroke-dasharray='3, 2'");
     }
-});
-
-// Circle Menu API
-family.nodeCircleMenuUI.on('show', function (sender, args) {
-    args.menu.mother = {
-        icon: FamilyTree.icon.mother(30, 30, '#F57C00'),
-        text: "Add mother",
-        color: "white"
-    };
-    args.menu.father = {
-        icon: FamilyTree.icon.father(30, 30, '#039BE5'),
-        text: "Add father",
-        color: "white"
-    };
-    args.menu.wife = {
-        icon: FamilyTree.icon.wife(30, 30, '#F57C00'),
-        text: "Add wife",
-        color: "white"
-    };
-    args.menu.husband = {
-        icon: FamilyTree.icon.husband(30, 30, '#039BE5'),
-        text: "Add husband",
-        color: "white"
-    };
-    args.menu.son = {
-        icon: FamilyTree.icon.son(30, 30, '#42A5F5'),
-        text: "Add son",
-        color: "white"
-    };
-    args.menu.daughter = {
-        icon: FamilyTree.icon.daughter(30, 30, '#EC407A'),
-        text: "Add daughter",
-        color: "white"
-    };
-});
-
-family.nodeCircleMenuUI.on('click', function (sender, args) {
-    var node = family.getNode(args.nodeId);
-
-    switch (args.menuItemName) {
-        case "husband":
-            family.addPartnerNode({ gender: 'male', pids: [args.nodeId] }, null, true);
-            break;
-        case "wife":
-            family.addPartnerNode({ gender: 'female', pids: [args.nodeId] }, null, true);
-            break;
-        case "mother":
-            family.addParentNode(args.nodeId, 'mid', { gender: 'female' }, null, true);
-            break;
-        case "father":
-            family.addParentNode(args.nodeId, 'fid', { gender: 'male' }, null, true);
-            break;
-        case "son":
-            family.addChildNode({ gender: 'male', fid: node.id }, null, true);
-            break;
-        case "daughter":
-            family.addChildNode({ gender: 'female', fid: node.id }, null, true);
-            break;
-        case "pet":
-            family.addPartnerNode({ gender: 'pet', pids: [args.nodeId] }, null, true);
-            break;
-        default:
-    };
-});
-
-family.nodeCircleMenuUI.on('drop', function (sender, args) {
-    family.addClink(args.from, args.to).draw(FamilyTree.action.update);
-});
-
-family.nodeCircleMenuUI.on('mouseenter', function (sender, args) {
-    if (args.menuItem.text == "Remove node") {
-        var node = document.querySelector('[data-n-id="' + args.from + '"]');
-        node.style.opacity = 0.5;
-    }
-});
-
-family.nodeCircleMenuUI.on('mouseout', function (sender, args) {
-    var node = document.querySelector('[data-n-id="' + args.from + '"]');
-    node.style.opacity = 1;
 });
 
 family.load(data);

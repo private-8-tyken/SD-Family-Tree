@@ -68,3 +68,48 @@ body {
 .bft-light .bft-input>textarea.bft-validation-error {
     border-color: #ca2a2a
 }
+
+/* Button Style */
+.button-container {
+    position: absolute;
+    z-index: 1;
+    top: 5rem;
+    right: 1rem;
+}
+
+.button {
+    background-color: #039BE5;
+    /*border: none;*/
+    cursor: pointer;
+    /*height: 34px;*/
+    color: white;
+    padding: 0;
+    /*margin: 0;*/
+    text-align: center;
+    text-transform: uppercase;
+    /*display: inline-block;
+    width: 100%;*/
+    transition: all 0.5s ease;
+
+    width: 45px;
+    height: 45px;
+    border: 2px solid black;
+    margin: 10;
+}
+
+.button.disabled {
+    background-color: #252526;
+    cursor: unset;
+}
+
+.button.disabled .icon {
+    filter: invert(20%);
+}
+
+.td-button {
+    width: 100px;
+}
+
+.save {
+    background-color: #F57C00;
+}

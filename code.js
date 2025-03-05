@@ -21,7 +21,7 @@ FamilyTree.templates.base.defs =
             ${FamilyTree.icon.ft(20, 80, '#b1b9be', 105, -10)}
         </g>
         <clipPath id="base_img_0">
-        <circle id="base_img_0_stroke" cx="45" cy="62" r="35"/>
+        <circle id="base_img_0_stroke" style="fill: transparent;" cx="45" cy="62" r="35"/>
         </clipPath>
         <clipPath id="base_img_1">
         <circle id="base_img_1_stroke" cx="100" cy="62" r="35"/>
@@ -177,7 +177,7 @@ var family = new FamilyTree(document.getElementById("tree"), {
         remove: { text: "Delete Person" }
     },
     nodeBinding: {
-        field_0: "relationship",
+        field_0: "Relationship",
         field_1: "name",
         field_2: "bdate",
         //field_3: "id",
@@ -208,6 +208,7 @@ var family = new FamilyTree(document.getElementById("tree"), {
                 { type: 'select', label: 'Country', binding: 'country' }, //options: [{ value: 'bg', text: 'Bulgaria' }, { value: 'ru', text: 'Russia' }, { value: 'gr', text: 'Greece' }], label: 'Country', binding: 'country' }
                 { type: 'textbox', label: 'City', binding: 'city' }
             ],
+            { type: 'textbox', label: 'Relationship', binding: 'Relationship' },
             [
                 { type: 'textbox', label: 'Photo Url', binding: 'photo', btn: 'Upload' },
                 { type: 'textbox', label: 'ID', binding: 'id' },
@@ -238,7 +239,7 @@ var family = new FamilyTree(document.getElementById("tree"), {
         }
     },
     orderBy: "orderId",
-    filterBy: ['relationship'], // FILTER FUNCTION TO BE ADDED
+    filterBy: ['Relationship'], // FILTER FUNCTION TO BE ADDED
     tags: {
         "single_male": {
             template: "single_male"
@@ -326,4 +327,100 @@ family.on('render-link', function (sender, args) {
     }
 });
 
+family.on('updated', function (sender, args) {
+    document.getElementById('save').classList.remove('disabled');
+});
+
+family.on('added', function (sender, args) {
+    document.getElementById('save').classList.remove('disabled');
+});
+
+family.on('removed', function (sender, args) {
+    document.getElementById('save').classList.remove('disabled');
+});
+
 family.load(data);
+
+document.getElementById('save').addEventListener('click', function () {
+    saveCSV(family.config.nodes).then(() => {
+        document.getElementById('save').classList.add('disabled');
+    });
+});
+
+document.getElementById('open').addEventListener('click', function () {
+    openCSV().then((nodes) => {
+        document.getElementById('save').classList.add('disabled');
+    });
+});
+
+var fileHandle = null;
+var lastModified = 0;
+
+async function saveCSV(nodes) {
+    if (window.parent != window) {
+        if (confirm("In order to test the Code you have to open it in a new tab. Would you like to open it in a new tab?")) {
+            window.open("https://code.balkan.app/result/code-of-the-week/read-and-write-local-csv-file-using-file-api-and-org-chart-js")
+        }
+        return;
+    }
+    var blob = new Blob([OrgChart.convertNodesToCsv(nodes)], { type: "text/csv" });
+
+    if (fileHandle == null) {
+        fileHandle = await window.showSaveFilePicker({
+            suggestedName: "code-demo.csv",
+            types: [{
+                description: "Comma-separated values file",
+                accept: { "text/csv": [".csv"] }
+            }]
+        });
+        lastModified = 0;
+        updateTitle(fileHandle.name);
+    }
+    const fileStream = await fileHandle.createWritable();
+
+    await fileStream.write(blob);
+    await fileStream.close();
+}
+
+async function openCSV() {
+    if (window.parent != window) {
+        if (confirm("In order to test the Code you have to open it in a new tab. Would you like to open it in a new tab?")) {
+            window.open("https://code.balkan.app/result/code-of-the-week/read-and-write-local-csv-file-using-file-api-and-org-chart-js")
+        }
+        return;
+    }
+
+    const pickerOpts = {
+        types: [{
+            description: "Comma-separated values file",
+            accept: { "text/csv": [".csv"] }
+        }],
+        excludeAcceptAllOption: true,
+        multiple: false,
+    };
+
+    var fileHandles = await window.showOpenFilePicker(pickerOpts);
+    if (Array.isArray(fileHandles) && fileHandles.length) {
+        fileHandle = fileHandles[0];
+        lastModified = 0;
+        updateTitle(fileHandle.name);
+
+        loadFile();
+    }
+}
+
+
+async function loadFile() {
+    if (fileHandle != null) {
+        const fileData = await fileHandle.getFile();
+        if (lastModified < fileData.lastModified) {
+            console.log('load')
+            var text = await fileData.text();
+            var nodes = OrgChart.convertCsvToNodes(text);
+            chart.load(nodes);
+            lastModified = fileData.lastModified;
+        }
+    }
+}
+
+setInterval(loadFile, 1000);

@@ -1,5 +1,4 @@
 import { data } from './data.js'
-require('dotenv').config();
 
 FamilyTree.templates.base.defs =
     `

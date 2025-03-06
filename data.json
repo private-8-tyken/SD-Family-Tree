@@ -7,7 +7,16 @@
     "fid": "_cjnw",
     "tags": "",
     "pids": "",
-    "mid": ""
+    "mid": "",
+    "mobile": "",
+    "email": "",
+    "bdate": "",
+    "address": "",
+    "country": "",
+    "city": "",
+    "photo": "",
+    "divorced": "",
+    "notes": ""
   },
   {
     "id": "2",
@@ -17,16 +26,34 @@
     "fid": "",
     "tags": "",
     "pids": "",
-    "mid": "1"
+    "mid": "1",
+    "mobile": "",
+    "email": "",
+    "bdate": "",
+    "address": "",
+    "country": "",
+    "city": "",
+    "photo": "",
+    "divorced": "",
+    "notes": ""
   },
   {
     "id": "_cjnw",
     "Relationship": "",
-    "name": "",
+    "name": "Test1",
     "gender": "male",
     "fid": "",
     "tags": "",
     "pids": "",
-    "mid": ""
+    "mid": "",
+    "mobile": "",
+    "email": "",
+    "bdate": "",
+    "address": "",
+    "country": "",
+    "city": "",
+    "photo": "",
+    "divorced": "",
+    "notes": ""
   }
 ]

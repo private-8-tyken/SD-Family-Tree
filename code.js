@@ -304,7 +304,6 @@ family.on("updated", function (sender, args) {
     }
 });
 
-
 family.on('field', function (sender, args) {
     if (args.name == "bdate") {
         if (args.data["ddate"]) {
@@ -339,88 +338,112 @@ family.on('removed', function (sender, args) {
     document.getElementById('save').classList.remove('disabled');
 });
 
-family.load(data);
 
-document.getElementById('save').addEventListener('click', function () {
-    saveCSV(family.config.nodes).then(() => {
-        document.getElementById('save').classList.add('disabled');
-    });
+/* ===================
+    FILE SAVING
+=================== */
+const GITHUB_TOKEN = "process.env.CSV_TOKEN";  // <--- your GitHub PAT
+const GITHUB_OWNER = "private-8-tyken";        // e.g. "octocat"
+const GITHUB_REPO = "Organization-Char";// e.g. "test-familytree"
+const GITHUB_PATH = "data/data.csv";  // path in your repo
+const GITHUB_BRANCH = "main";           // branch name
+
+let currentFileSha = null;
+
+(async function loadCsvFromGitHub() {
+    try {
+        const resp = await fetch(
+            `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}?ref=${GITHUB_BRANCH}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Authorization': `token ${GITHUB_TOKEN}`
+                }
+            }
+        );
+
+        if (!resp.ok) {
+            throw new Error(`GitHub GET error: ${resp.status}`);
+        }
+
+        const json = await resp.json();
+        // json.content is base64-encoded text of the file
+        // json.sha is the file's current commit sha
+        currentFileSha = json.sha;
+
+        // decode base64 to CSV text
+        const decodedContent = atob(json.content);
+
+        // convert CSV -> nodes array
+        const nodesArray = FamilyTree.convertCsvToNodes(decodedContent);
+        // load into the FamilyTree
+        family.load(nodesArray);
+
+        console.log("Loaded CSV from GitHub. currentFileSha=", currentFileSha);
+    } catch (err) {
+        console.error("Error loading CSV from GitHub:", err);
+    }
+})();
+
+
+// 3) If FamilyTree changes, enable the “Save” button
+const saveBtn = document.getElementById('save');
+["updated", "added", "removed"].forEach(evt => {
+    family.on(evt, () => saveBtn.classList.remove('disabled'));
 });
 
-document.getElementById('open').addEventListener('click', function () {
-    openCSV().then((nodes) => {
-        document.getElementById('save').classList.add('disabled');
-    });
+
+/**
+ * 4) On “Save,” PUT the updated CSV to GitHub.
+ */
+saveBtn.addEventListener('click', async () => {
+    if (saveBtn.classList.contains("disabled")) return;
+
+    try {
+        // Convert chart data to CSV
+        const csvData = FamilyTree.convertNodesToCsv(family.config.nodes);
+
+        // base64-encode the CSV
+        const base64Csv = btoa(csvData);
+
+        // Construct the PUT request body
+        const body = {
+            message: "Update data.csv from FamilyTree web app",
+            content: base64Csv,
+            sha: currentFileSha,
+            branch: GITHUB_BRANCH
+        };
+
+        // PUT to GitHub contents API
+        const resp = await fetch(
+            `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Authorization': `token ${GITHUB_TOKEN}`
+                },
+                body: JSON.stringify(body)
+            }
+        );
+
+        if (!resp.ok) {
+            throw new Error(`GitHub PUT error: ${resp.status}`);
+        }
+
+        // If successful, GitHub returns a JSON with "content.sha" for the new commit
+        const updatedJson = await resp.json();
+        currentFileSha = updatedJson.content.sha;
+
+        console.log("Successfully committed new CSV to GitHub. New sha:", currentFileSha);
+
+        // Optionally, re-fetch from GitHub to confirm changes and reload chart
+        await reloadFromGitHub();
+
+        // Re-disable the button after saving
+        saveBtn.classList.add('disabled');
+    } catch (error) {
+        console.error("Error saving CSV to GitHub:", error);
+    }
 });
-
-var fileHandle = null;
-var lastModified = 0;
-
-async function saveCSV(nodes) {
-    if (window.parent != window) {
-        if (confirm("In order to test the Code you have to open it in a new tab. Would you like to open it in a new tab?")) {
-            window.open("https://code.balkan.app/result/code-of-the-week/read-and-write-local-csv-file-using-file-api-and-org-chart-js")
-        }
-        return;
-    }
-    var blob = new Blob([OrgChart.convertNodesToCsv(nodes)], { type: "text/csv" });
-
-    if (fileHandle == null) {
-        fileHandle = await window.showSaveFilePicker({
-            suggestedName: "code-demo.csv",
-            types: [{
-                description: "Comma-separated values file",
-                accept: { "text/csv": [".csv"] }
-            }]
-        });
-        lastModified = 0;
-        updateTitle(fileHandle.name);
-    }
-    const fileStream = await fileHandle.createWritable();
-
-    await fileStream.write(blob);
-    await fileStream.close();
-}
-
-async function openCSV() {
-    if (window.parent != window) {
-        if (confirm("In order to test the Code you have to open it in a new tab. Would you like to open it in a new tab?")) {
-            window.open("https://code.balkan.app/result/code-of-the-week/read-and-write-local-csv-file-using-file-api-and-org-chart-js")
-        }
-        return;
-    }
-
-    const pickerOpts = {
-        types: [{
-            description: "Comma-separated values file",
-            accept: { "text/csv": [".csv"] }
-        }],
-        excludeAcceptAllOption: true,
-        multiple: false,
-    };
-
-    var fileHandles = await window.showOpenFilePicker(pickerOpts);
-    if (Array.isArray(fileHandles) && fileHandles.length) {
-        fileHandle = fileHandles[0];
-        lastModified = 0;
-        updateTitle(fileHandle.name);
-
-        loadFile();
-    }
-}
-
-
-async function loadFile() {
-    if (fileHandle != null) {
-        const fileData = await fileHandle.getFile();
-        if (lastModified < fileData.lastModified) {
-            console.log('load')
-            var text = await fileData.text();
-            var nodes = OrgChart.convertCsvToNodes(text);
-            chart.load(nodes);
-            lastModified = fileData.lastModified;
-        }
-    }
-}
-
-setInterval(loadFile, 1000);

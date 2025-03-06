@@ -342,108 +342,128 @@ family.on('removed', function (sender, args) {
 /* ===================
     FILE SAVING
 =================== */
-const GITHUB_TOKEN = "process.env.CSV_TOKEN";  // <--- your GitHub PAT
+const GITHUB_TOKEN = process.env.CSV_TOKEN;  // <--- your GitHub PAT
 const GITHUB_OWNER = "private-8-tyken";        // e.g. "octocat"
 const GITHUB_REPO = "Organization-Chart";// e.g. "test-familytree"
-const GITHUB_PATH = "data/data.csv";  // path in your repo
-const GITHUB_BRANCH = "main";           // branch name
+const GITHUB_PATH = "data.json";  // path in your repo
+const GITHUB_BRANCH = "node";           // branch name
 
-let currentFileSha = null;
+let currentFileSha;
 
-(async function loadCsvFromGitHub() {
+(async function loadData() {
     try {
         const resp = await fetch(
-            `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}?ref=${GITHUB_BRANCH}`,
-            {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Authorization': `token ${GITHUB_TOKEN}`
-                }
-            }
+            `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_PATH}`
         );
 
         if (!resp.ok) {
             throw new Error(`GitHub GET error: ${resp.status}`);
         }
 
-        const json = await resp.json();
-        // json.content is base64-encoded text of the file
-        // json.sha is the file's current commit sha
-        currentFileSha = json.sha;
-
-        // decode base64 to CSV text
-        const decodedContent = atob(json.content);
-
-        // convert CSV -> nodes array
-        const nodesArray = FamilyTree.convertCsvToNodes(decodedContent);
-        // load into the FamilyTree
-        family.load(nodesArray);
-
-        console.log("Loaded CSV from GitHub. currentFileSha=", currentFileSha);
+        var data = await resp.json();
+        family.load(data);
+        console.log("Hello Family!");
     } catch (err) {
         console.error("Error loading CSV from GitHub:", err);
     }
 })();
 
+function csvToJson(csvString) {
+    const lines = csvString.trim().split("\n");
+    const headers = lines[0].split(",");
 
-// 3) If FamilyTree changes, enable the “Save” button
+    return lines.slice(1).map(line => {
+        const values = line.split(",");
+        return headers.reduce((acc, header, index) => {
+            acc[header] = values[index];
+            return acc;
+        }, {});
+    });
+}
+
+// If FamilyTree changes, enable the “Save” button
 const saveBtn = document.getElementById('save');
 ["updated", "added", "removed"].forEach(evt => {
     family.on(evt, () => saveBtn.classList.remove('disabled'));
 });
 
-
-/**
- * 4) On “Save,” PUT the updated CSV to GitHub.
- */
+// 4) On “Save,” PUT the updated CSV to GitHub.
 saveBtn.addEventListener('click', async () => {
     if (saveBtn.classList.contains("disabled")) return;
 
     try {
-        // Convert chart data to CSV
-        const csvData = FamilyTree.convertNodesToCsv(family.config.nodes);
+        var exportData = csvToJson(FamilyTree.convertNodesToCsv(family.config.nodes));
+        console.log("Export", exportData);
 
-        // base64-encode the CSV
-        const base64Csv = btoa(csvData);
+        const jsonString = JSON.stringify(exportData, null, 2);
+        const base64Contents = utf8ToBase64(jsonString);
 
-        // Construct the PUT request body
-        const body = {
-            message: "Update data.csv from FamilyTree web app",
-            content: base64Csv,
-            sha: currentFileSha,
-            branch: GITHUB_BRANCH
-        };
-
-        // PUT to GitHub contents API
-        const resp = await fetch(
-            `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`,
-            {
-                method: 'PUT',
-                headers: {
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Authorization': `token ${GITHUB_TOKEN}`
-                },
-                body: JSON.stringify(body)
-            }
-        );
-
-        if (!resp.ok) {
-            throw new Error(`GitHub PUT error: ${resp.status}`);
-        }
-
-        // If successful, GitHub returns a JSON with "content.sha" for the new commit
-        const updatedJson = await resp.json();
-        currentFileSha = updatedJson.content.sha;
-
-        console.log("Successfully committed new CSV to GitHub. New sha:", currentFileSha);
-
-        // Optionally, re-fetch from GitHub to confirm changes and reload chart
-        await reloadFromGitHub();
-
-        // Re-disable the button after saving
-        saveBtn.classList.add('disabled');
+        updateFile(base64Contents);
     } catch (error) {
         console.error("Error saving CSV to GitHub:", error);
     }
 });
+
+async function updateFile(contents) {
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+
+    let sha = currentFileSha;
+    if (!sha) {
+        const getResp = await fetch(`${url}?ref=${GITHUB_BRANCH}`, {
+            headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
+        });
+        if (getResp.ok) {
+            const fileData = await getResp.json();
+            sha = fileData.sha;
+        }
+    }
+
+    console.log("Using SHA:", sha);
+
+    // Construct the request body.
+    // If sha is undefined (i.e. file doesn't exist), omit it.
+    const body = {
+        message: 'Update data.json',
+        content: contents,
+        branch: GITHUB_BRANCH,
+        ...(sha && { sha })
+    };
+
+    // PUT the updated file
+    const putResp = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (!putResp.ok) {
+        throw new Error(`Update failed: ${await putResp.text()}`);
+    } else {
+        saveBtn.classList.add('disabled');
+    }
+
+    const result = await putResp.json();
+    console.log('File updated successfully:', result);
+
+    // Save the new SHA for future updates.
+    currentFileSha = result.content.sha;
+}
+
+function utf8ToBase64(str) {
+    // Encode str as UTF-8, then btoa
+    return btoa(
+        encodeURIComponent(str)
+            .replace(/%([0-9A-F]{2})/g, (_, p1) =>
+                String.fromCharCode('0x' + p1)
+            )
+    );
+}
+
+
+
+
+
+

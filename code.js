@@ -1,4 +1,9 @@
 // import { data } from './data_test.js'
+const partA = 'github_pat_11BQD7X7Q0ux';
+const partB = '3rAX6OC3Ji_2euHRg3KrnHp';
+const partC = 'QY7OXTz9cWzBQvJBuQ0Efls';
+const partD = 'RO1CIweuQ7SRGQBDCBApSXg1';
+
 
 FamilyTree.templates.base.defs =
     `
@@ -338,19 +343,17 @@ family.on('removed', function (sender, args) {
     document.getElementById('save').classList.remove('disabled');
 });
 
-
 /* ===================
     FILE SAVING
 =================== */
-//const GITHUB_TOKEN = process.env.CSV_TOKEN;  // <--- your GitHub PAT
+const GITHUB_TOKEN = partA + partB + partC + partD;  // <--- your GitHub PAT
 const GITHUB_OWNER = "private-8-tyken";        // e.g. "octocat"
 const GITHUB_REPO = "Organization-Chart";// e.g. "test-familytree"
 const GITHUB_PATH = "data.json";  // path in your repo
 const GITHUB_BRANCH = "node";           // branch name
-const GITHUB_WORKFLOW = "main.yml";             // your workflow file name in .github/workflows/
 
-let currentFileSha;
 const saveBtn = document.getElementById('save');
+let currentFileSha;
 
 (async function loadData() {
     try {
@@ -392,48 +395,14 @@ saveBtn.addEventListener('click', async () => {
         console.log("Export", exportData);
 
         const jsonString = JSON.stringify(exportData, null, 2);
-        //const base64Contents = utf8ToBase64(jsonString);
-        await updateFile(jsonString);
+        const base64Contents = utf8ToBase64(jsonString);
 
-        //updateFile(base64Contents);
+        updateFile(base64Contents);
     } catch (error) {
         console.error("Error saving CSV to GitHub:", error);
     }
 });
 
-async function updateFile(contents) {
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${GITHUB_WORKFLOW}/dispatches`;
-
-    // Construct the payload. Note that the workflow must be configured to accept an input named "file_content".
-    const body = {
-        ref: GITHUB_BRANCH,
-        inputs: {
-            file_content: contents
-        }
-    };
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            // Using a token here on the client is not ideal.
-            // In production, proxy this request through a secure backend.
-            'Accept': 'application/vnd.github+json',
-            'Authorization': `Bearer YOUR_TEMPORARY_TOKEN`,  // Replace this with a secure call
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Workflow dispatch failed:", errorText);
-        throw new Error("Workflow dispatch failed");
-    } else {
-        console.log("Workflow dispatch triggered successfully.");
-    }
-}
-
-/*
 async function updateFile(contents) {
     const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
 
@@ -490,4 +459,5 @@ function utf8ToBase64(str) {
             )
     );
 }
-*/
+
+

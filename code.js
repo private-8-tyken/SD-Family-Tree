@@ -358,7 +358,13 @@ let currentFileSha;
 (async function loadData() {
     try {
         const resp = await fetch(
-            `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_PATH}`
+            `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_PATH}`,
+            {
+                headers: {
+                    "Authorization": `token ${GITHUB_TOKEN}`,
+                    "Accept": "application/vnd.github.v3.raw"
+                }
+            }
         );
 
         if (!resp.ok) {

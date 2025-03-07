@@ -354,24 +354,30 @@ const GITHUB_BRANCH = "main";           // branch name
 
 const saveBtn = document.getElementById('save');
 let currentFileSha;
+const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
 
 (async function loadData() {
     try {
         const resp = await fetch(
-            `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${GITHUB_PATH}`,
-            {
-                headers: {
-                    "Authorization": `token ${GITHUB_TOKEN}`,
-                    "Accept": "application/vnd.github.v3.raw"
-                }
+            `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}?ref=${GITHUB_BRANCH}`, {
+            headers: {
+                "Authorization": `token ${GITHUB_TOKEN}`,
+                "Accept": "application/vnd.github.v3.raw"
             }
-        );
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text();  // Use .json() if expecting JSON
+            })
+            .catch(error => {
+                console.error("Error fetching file:", error);
+            });
 
-        if (!resp.ok) {
-            throw new Error(`GitHub GET error: ${resp.status}`);
-        }
+        const data = JSON.parse(resp);
+        console.log(data);
 
-        var data = await resp.json();
         family.load(data);
         console.log("Hello Family!");
     } catch (err) {
@@ -399,7 +405,6 @@ saveBtn.addEventListener('click', async () => {
     try {
         var exportData = csvToJson(FamilyTree.convertNodesToCsv(family.config.nodes));
         console.log("Export", exportData);
-
         const jsonString = JSON.stringify(exportData, null, 2);
         const base64Contents = utf8ToBase64(jsonString);
 
@@ -410,11 +415,9 @@ saveBtn.addEventListener('click', async () => {
 });
 
 async function updateFile(contents) {
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
-
     let sha = currentFileSha;
     if (!sha) {
-        const getResp = await fetch(`${url}?ref=${GITHUB_BRANCH}`, {
+        const getResp = await fetch(`${url}`, {
             headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` }
         });
         if (getResp.ok) {

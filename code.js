@@ -1,4 +1,4 @@
-import { data } from './data_test.js'
+// import { data } from './data_test.js'
 
 FamilyTree.templates.base.defs =
     `

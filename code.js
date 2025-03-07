@@ -342,7 +342,7 @@ family.on('removed', function (sender, args) {
 /* ===================
     FILE SAVING
 =================== */
-const GITHUB_TOKEN = "process.env.CSV_TOKEN";  // <--- your GitHub PAT
+const GITHUB_TOKEN = process.env.CSV_TOKEN;  // <--- your GitHub PAT
 const GITHUB_OWNER = "private-8-tyken";        // e.g. "octocat"
 const GITHUB_REPO = "Organization-Chart";// e.g. "test-familytree"
 const GITHUB_PATH = "data/data.csv";  // path in your repo

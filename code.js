@@ -1,5 +1,5 @@
 // import { data } from './data_test.js'
-const partA = 'github_pat_11BQD7X7Q0ux';
+const partA = '11BQD7X7Q0ux';
 const partB = '3rAX6OC3Ji_2euHRg3KrnHp';
 const partC = 'QY7OXTz9cWzBQvJBuQ0Efls';
 const partD = 'RO1CIweuQ7SRGQBDCBApSXg1';
@@ -346,11 +346,11 @@ family.on('removed', function (sender, args) {
 /* ===================
     FILE SAVING
 =================== */
-const GITHUB_TOKEN = partA + partB + partC + partD;  // <--- your GitHub PAT
+const GITHUB_TOKEN = 'github_pat_' + partA + partB + partC + partD;
 const GITHUB_OWNER = "private-8-tyken";        // e.g. "octocat"
-const GITHUB_REPO = "Organization-Chart";// e.g. "test-familytree"
+const GITHUB_REPO = "fam";// e.g. "test-familytree"
 const GITHUB_PATH = "data.json";  // path in your repo
-const GITHUB_BRANCH = "node";           // branch name
+const GITHUB_BRANCH = "main";           // branch name
 
 const saveBtn = document.getElementById('save');
 let currentFileSha;

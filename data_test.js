@@ -1,4 +1,85 @@
 export var data = [
+    {
+        id: "_hg0r",
+        name: "Ethan Lau",
+        mobile: "6507961835",
+        email: "",
+        bdate: "2003-02-25",
+        gender: "male",
+        address: "3425 Lebon Dr.",
+        country: " APT 834",
+        city: "",
+        Relationship: ["San Diego", "The Trio"],
+        photo: "The Trio",
+        divorced: "https://e8lau.github.io/portfolio/images/profile_photo.jpg",
+        notes: "",
+        pids: "",
+        tags: "",
+        fid: "",
+        mid: "_8ei0"
+    },
+    {
+        id: "_8ei0",
+        name: "The Trio",
+        mobile: "",
+        email: "",
+        bdate: "",
+        gender: "",
+        address: "",
+        country: "",
+        city: "",
+        Relationship: "",
+        photo: "",
+        divorced: "",
+        notes: "",
+        pids: "",
+        tags: "",
+        fid: "",
+        mid: ""
+    },
+    {
+        id: "_la9x",
+        name: "Hillary Zhou",
+        mobile: "",
+        email: "",
+        bdate: "",
+        gender: "female",
+        address: "",
+        country: "",
+        city: "",
+        Relationship: "",
+        photo: "",
+        divorced: "",
+        notes: "",
+        pids: "",
+        tags: "",
+        fid: "",
+        mid: "_8ei0"
+    },
+    {
+        id: "_lhgq",
+        name: "Kat Arinduque",
+        mobile: "",
+        email: "",
+        bdate: "",
+        gender: "female",
+        address: "",
+        country: "",
+        city: "",
+        Relationship: "",
+        photo: "",
+        divorced: "",
+        notes: "",
+        pids: "",
+        tags: "",
+        fid: "",
+        mid: "_8ei0"
+    }
+]
+
+
+/*
+export var data = [
     { id: 1, pids: [2], orderId: 1, Relationship: "Great Great mainfather", name: "Jessie England", photo: "https://cdn.balkan.app/shared/m60/1.jpg", bdate: '1-11-2020', ddate: 1900 },
     { id: 2, pids: [1], orderId: 2, Relationship: "Great Great mainmother", name: "Quinn West", photo: "https://cdn.balkan.app/shared/w60/1.jpg", bdate: 1800, ddate: 1900 },
     { id: 3, mid: 1, fid: 2, pids: [6], orderId: 4, Relationship: "Great mainfather", name: "Ryan Walmsley", photo: "https://cdn.balkan.app/shared/m60/2.jpg", bdate: 1830, ddate: 1930 },
@@ -71,3 +152,4 @@ export var data = [
     { id: 1502, pids: [1503], Relationship: "Father in Law", gender: "male", name: "Verity Acevedo", photo: "https://cdn.balkan.app/shared/9.jpg" },
     { id: 1503, pids: [1502], Relationship: "Mother in Law", gender: "female", name: "Sol Rankin", photo: "https://cdn.balkan.app/shared/2.jpg" },
 ]
+    */

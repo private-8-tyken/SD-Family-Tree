@@ -210,14 +210,17 @@ var family = new FamilyTree(document.getElementById("tree"), {
             ],
             { type: 'textbox', label: 'Address', binding: 'address' },
             [
-                { type: 'select', label: 'Country', binding: 'country' }, //options: [{ value: 'bg', text: 'Bulgaria' }, { value: 'ru', text: 'Russia' }, { value: 'gr', text: 'Greece' }], label: 'Country', binding: 'country' }
+                { type: 'textbox', label: 'Country', binding: 'country' }, //options: [{ value: 'bg', text: 'Bulgaria' }, { value: 'ru', text: 'Russia' }, { value: 'gr', text: 'Greece' }], label: 'Country', binding: 'country' }
                 { type: 'textbox', label: 'City', binding: 'city' }
             ],
             { type: 'textbox', label: 'Relationship', binding: 'Relationship' },
             [
                 { type: 'textbox', label: 'Photo Url', binding: 'photo', btn: 'Upload' },
-                { type: 'textbox', label: 'ID', binding: 'id' },
                 { type: 'textbox', label: 'Divorced?', binding: 'divorced' }
+            ],
+            [
+                { type: 'textbox', label: 'ID', binding: 'id' },
+                { type: 'textbox', label: 'Order ID', binding: 'orderId' }
             ],
             { type: 'textarea', label: 'Notes', binding: 'notes' }
         ],
@@ -331,6 +334,18 @@ family.on('render-link', function (sender, args) {
     }
 });
 
+// Update Relationship Format
+family.editUI.on('save', function (sender, args) {
+    const nodeData = args.data;
+
+    if (nodeData.Relationship) {
+        nodeData.Relationship = nodeData.Relationship
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item !== '');
+    }
+});
+
 family.on('updated', function (sender, args) {
     document.getElementById('save').classList.remove('disabled');
 });
@@ -408,6 +423,7 @@ saveBtn.addEventListener('click', async () => {
         const jsonString = JSON.stringify(exportData, null, 2);
         const base64Contents = utf8ToBase64(jsonString);
 
+        // console.log(jsonString);
         updateFile(base64Contents);
     } catch (error) {
         console.error("Error saving CSV to GitHub:", error);
@@ -468,5 +484,6 @@ function utf8ToBase64(str) {
             )
     );
 }
+
 
 

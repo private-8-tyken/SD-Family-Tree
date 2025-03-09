@@ -215,7 +215,13 @@ var family = new FamilyTree(document.getElementById("tree"), {
             ],
             [
                 { type: 'date', label: 'Birth Date', binding: 'bdate' },
-                { type: 'textbox', label: 'Gender', binding: 'gender' }
+                { type: 'select', label: 'Gender', binding: 'gender',
+                    options: [
+                        {value: 'male', text: 'Male'},
+                        {value: 'female', text: 'Female'},
+                        {value: '', text: 'Other'}
+                    ]
+                 }
             ],
             { type: 'textbox', label: 'Address', binding: 'address' },
             [

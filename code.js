@@ -237,11 +237,15 @@ var family = new FamilyTree(document.getElementById("tree"), {
             { type: 'textbox', label: 'Relationship', binding: 'Relationship' },
             [
                 { type: 'textbox', label: 'Photo Url', binding: 'photo', btn: 'Upload' },
-                { type: 'textbox', label: 'Divorced?', binding: 'divorced' }
+                { type: 'textbox', label: 'Dotted Line to', binding: 'divorced' }
             ],
             [
                 { type: 'textbox', label: 'ID', binding: 'id' },
                 { type: 'textbox', label: 'Order ID', binding: 'orderId' }
+            ],
+            [
+                { type: 'textbox', label: 'Father ID', binding: 'fid' },
+                { type: 'textbox', label: 'Mother ID', binding: 'mid' }
             ],
             { type: 'textarea', label: 'Notes', binding: 'notes' }
         ],
@@ -302,56 +306,132 @@ family.on('render-link', function (sender, args) {
 });
 */
 
-family.on("updated", function (sender, args) {
-    try {
-        var originalNode = family.get(args.updateNodesData[0].id);
-        var hasChildren = false;
+// UPDATING NODE TYPE (Shape)
+var globalNodeMap = {};
 
-        var addedNodes = args.addNodesData;
-        for (var i = 0; i < addedNodes.length; i++) {
-            var node = addedNodes[i];
-            console.log(node);
-
-            if (
-                node.fid == originalNode.id ||
-                node.mid == originalNode.id
-            ) {
-                hasChildren = true;
+function syncGlobalMapForNodes() {
+    family.config.nodes.forEach(function (node) {
+        if (!globalNodeMap[node.id]) {
+            // Combine mid and fid into one array.
+            var parents = [];
+            if (node.mid && node.mid.trim() !== "") {
+                parents.push(node.mid);
             }
+            if (node.fid && node.fid.trim() !== "") {
+                parents.push(node.fid);
+            }
+            globalNodeMap[node.id] = {
+                pids: node.pids || [],  // partners (a list)
+                parents: parents,       // combined parents (strings)
+                childIds: [],           // will be re-populated below
+                gender: node.gender || ''
+            };
+        }
+    });
 
-            if (node.hasOwnProperty("mid") || node.hasOwnProperty("fid")) {
-                var childNode = family.get(node.id);
-                childNode.tags = childNode.gender == 'male' ? ['family_single_male'] : ['family_single_female'];
+    // Second pass: Clear all childIds and recalc them by scanning each node’s parents.
+    for (var nodeId in globalNodeMap) {
+        if (globalNodeMap.hasOwnProperty(nodeId)) {
+            globalNodeMap[nodeId].childIds = [];
+        }
+    }
 
-                family.updateNode(childNode, function () {
-                    console.log('Child Node Updated:', childNode);
+    // Loop over all nodes and add this node’s id to each of its parent's childIds.
+    family.config.nodes.forEach(function (node) {
+        var parents = [];
+        if (node.mid && node.mid.trim() !== "") {
+            parents.push(node.mid);
+        }
+        if (node.fid && node.fid.trim() !== "") {
+            parents.push(node.fid);
+        }
+        parents.forEach(function (parentId) {
+            if (globalNodeMap[parentId]) {
+                if (!globalNodeMap[parentId].childIds.includes(node.id)) {
+                    globalNodeMap[parentId].childIds.push(node.id);
+                }
+            }
+        });
+    });
+}
+
+function removeFromGlobalMap(node) {
+    if (globalNodeMap) {
+        // For every entry in the global map, remove any occurrence of node.id.
+        Object.keys(globalNodeMap).forEach(function (key) {
+            var entry = globalNodeMap[key];
+            // Remove from parents (if any)
+            if (entry.parents) {
+                entry.parents = entry.parents.filter(function (id) {
+                    return id !== node.id;
                 });
             }
-        }
-
-        if (hasChildren) {
-            if (originalNode.gender === 'male') {
-                originalNode.tags = ['main_male'];
-            } else if (originalNode.gender === 'female') {
-                originalNode.tags = ['main_female'];
-            } else {
-                originalNode.tags = [''];
+            // Remove from pids (partners) since pids is a list.
+            if (entry.pids) {
+                entry.pids = entry.pids.filter(function (id) {
+                    return id !== node.id;
+                });
             }
-        } else {
-            if (originalNode.gender === 'male') {
-                originalNode.tags = ['single_male'];
-            } else if (originalNode.gender === 'female') {
-                originalNode.tags = ['single_female'];
-            } else {
-                originalNode.tags = [''];
+            // Remove from childIds.
+            if (entry.childIds) {
+                entry.childIds = entry.childIds.filter(function (id) {
+                    return id !== node.id;
+                });
             }
-        }
-
-        family.updateNode(originalNode, function () {
-            console.log('Original Node Updated:', originalNode);
         });
-    } catch {
-        console.log('No original node');
+        // Finally, remove the removed node's own entry from the global map.
+        delete globalNodeMap[node.id];
+    }
+}
+
+function updateTagForNode(node) {
+    var mapping = globalNodeMap[node.id];
+    // var node = family.get(node.id);
+    if (!mapping) return;
+
+    if (mapping.childIds && mapping.childIds.length > 0) {
+        node.tags = [];
+    } else {
+        if (mapping.gender === 'male') {
+            node.tags = ['single_male'];
+        } else if (mapping.gender === 'female') {
+            node.tags = ['single_female'];
+        } else {
+            node.tags = [];
+        }
+    }
+}
+
+family.on("updated", function (sender, args) {
+    syncGlobalMapForNodes();
+    // console.log("Global node map after sync:", globalNodeMap);
+
+    // Process added nodes
+    var addedNodes = args.addNodesData || [];
+    addedNodes.forEach(function (newNode) {
+        // newNode should now exist in globalNodeMap from our sync.
+        var nodeData = family.get(newNode.id);
+        updateTagForNode(nodeData);
+        family.updateNode(nodeData, function () {
+            console.log("Added node updated with tag:", nodeData);
+        });
+    });
+
+    // Process updated nodes
+    var updatedNodes = args.updateNodesData || [];
+    updatedNodes.forEach(function (updNode) {
+        var nodeData = family.get(updNode.id);
+        updateTagForNode(nodeData);
+        family.updateNode(nodeData, function () {
+            console.log("Updated node updated with tag:", nodeData);
+        });
+    });
+
+    // Process removed node (if provided)
+    if (args.removeNodeId) {
+        var removedNode = { id: args.removeNodeId };
+        removeFromGlobalMap(removedNode);
+        console.log("Removed node updated in global map for:", args.removeNodeId);
     }
 });
 
@@ -372,7 +452,7 @@ family.on('render-link', function (sender, args) {
 
     if (cnodeData.divorced != undefined && nodeData.divorced != undefined &&
         cnodeData.divorced.includes(args.node.id) && nodeData.divorced.includes(args.cnode.id)) {
-        console.log(args.html);
+        // console.log(args.html);
         args.html = args.html.replace("path", "path stroke-dasharray='3, 2'");
     }
 });
@@ -436,10 +516,11 @@ const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/content
             });
 
         const data = JSON.parse(resp);
-        console.log(data);
+        // console.log(data);
 
         family.load(data);
         console.log("Hello Family!");
+        syncGlobalMapForNodes();
     } catch (err) {
         console.error("Error loading CSV from GitHub:", err);
     }

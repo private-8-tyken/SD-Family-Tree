@@ -329,12 +329,22 @@ family.on("updated", function (sender, args) {
             }
         }
 
-        console.log(hasChildren);
-
         if (hasChildren) {
-            originalNode.tags = originalNode.gender == 'male' ? ['main_male'] : ['main_female'];
+            if (originalNode.gender === 'male') {
+                originalNode.tags = ['main_male'];
+            } else if (originalNode.gender === 'female') {
+                originalNode.tags = ['main_female'];
+            } else {
+                originalNode.tags = [''];
+            }
         } else {
-            originalNode.tags = originalNode.tags || [];
+            if (originalNode.gender === 'male') {
+                originalNode.tags = ['single_male'];
+            } else if (originalNode.gender === 'female') {
+                originalNode.tags = ['single_female'];
+            } else {
+                originalNode.tags = [''];
+            }
         }
 
         family.updateNode(originalNode, function () {

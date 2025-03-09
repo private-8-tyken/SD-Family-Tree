@@ -165,6 +165,15 @@ FamilyTree.elements.textarea = function (e, t, i, r) {
     }
 }
 
+FamilyTree.prototype.exportJSON = function (e) {
+    var t = FamilyTree._defaultExportProfileOptionsForCSV_SVG_JSON(e, "json")
+        , i = this.getNode(t.nodeId)
+        , r = null;
+    i ? (r = [],
+        FamilyTree._exportIterateForJSON_XML_CSV(this, i, t, r)) : !1 === t.min || !1 === t.expandChildren ? FamilyTree._exportIterateForJSON_XML_CSV(this, this.roots, t, r) : r = JSON.parse(JSON.stringify(this.config.nodes));
+    return r;
+}
+
 var family = new FamilyTree(document.getElementById("tree"), {
     template: "main",
     scaleInitial: FamilyTree.match.boundary,
@@ -334,6 +343,7 @@ family.on('render-link', function (sender, args) {
     }
 });
 
+/*
 // Update Relationship Format
 family.editUI.on('save', function (sender, args) {
     const nodeData = args.data;
@@ -345,6 +355,7 @@ family.editUI.on('save', function (sender, args) {
             .filter(item => item !== '');
     }
 });
+*/
 
 family.on('updated', function (sender, args) {
     document.getElementById('save').classList.remove('disabled');
@@ -418,12 +429,12 @@ saveBtn.addEventListener('click', async () => {
     if (saveBtn.classList.contains("disabled")) return;
 
     try {
-        var exportData = csvToJson(FamilyTree.convertNodesToCsv(family.config.nodes));
+        var exportData = family.exportJSON();
         console.log("Export", exportData);
         const jsonString = JSON.stringify(exportData, null, 2);
         const base64Contents = utf8ToBase64(jsonString);
 
-        // console.log(jsonString);
+        //console.log(jsonString);
         updateFile(base64Contents);
     } catch (error) {
         console.error("Error saving CSV to GitHub:", error);

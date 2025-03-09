@@ -223,10 +223,15 @@ var family = new FamilyTree(document.getElementById("tree"), {
                     ]
                  }
             ],
-            { type: 'textbox', label: 'Address', binding: 'address' },
+            { type: 'textbox', label: 'Address 1', binding: 'address1' },
+            { type: 'textbox', label: 'Address 2', binding: 'address2' },
             [
+                { type: 'textbox', label: 'City', binding: 'city' },
+                { type: 'textbox', label: 'State', binding: 'state' }
+            ],
+            [
+                { type: 'textbox', label: 'ZIP', binding: 'zipcode' },
                 { type: 'textbox', label: 'Country', binding: 'country' }, //options: [{ value: 'bg', text: 'Bulgaria' }, { value: 'ru', text: 'Russia' }, { value: 'gr', text: 'Greece' }], label: 'Country', binding: 'country' }
-                { type: 'textbox', label: 'City', binding: 'city' }
             ],
             { type: 'textbox', label: 'Relationship', binding: 'Relationship' },
             [

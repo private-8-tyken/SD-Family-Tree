@@ -215,13 +215,14 @@ var family = new FamilyTree(document.getElementById("tree"), {
             ],
             [
                 { type: 'date', label: 'Birth Date', binding: 'bdate' },
-                { type: 'select', label: 'Gender', binding: 'gender',
+                {
+                    type: 'select', label: 'Gender', binding: 'gender',
                     options: [
-                        {value: 'male', text: 'Male'},
-                        {value: 'female', text: 'Female'},
-                        {value: '', text: 'Other'}
+                        { value: 'male', text: 'Male' },
+                        { value: 'female', text: 'Female' },
+                        { value: '', text: 'Other' }
                     ]
-                 }
+                }
             ],
             { type: 'textbox', label: 'Address 1', binding: 'address1' },
             { type: 'textbox', label: 'Address 2', binding: 'address2' },
@@ -303,32 +304,44 @@ family.on('render-link', function (sender, args) {
 
 family.on("updated", function (sender, args) {
     try {
-        var orginalNode = family.get(args.updateNodesData[0].id);
-        orginalNode.tags = [];
+        var originalNode = family.get(args.updateNodesData[0].id);
+        var hasChildren = false;
 
-        family.updateNode(orginalNode, function () {
-            console.log('Node Updated:', orginalNode);
-        });
-    } catch {
-        console.log('No original node');
-    }
-
-    try {
         var addedNodes = args.addNodesData;
-
         for (var i = 0; i < addedNodes.length; i++) {
             var node = addedNodes[i];
+            console.log(node);
+
+            if (
+                node.fid == originalNode.id ||
+                node.mid == originalNode.id
+            ) {
+                hasChildren = true;
+            }
+
             if (node.hasOwnProperty("mid") || node.hasOwnProperty("fid")) {
                 var childNode = family.get(node.id);
                 childNode.tags = childNode.gender == 'male' ? ['family_single_male'] : ['family_single_female'];
 
                 family.updateNode(childNode, function () {
-                    console.log('Node Updated:', childNode);
+                    console.log('Child Node Updated:', childNode);
                 });
             }
         }
+
+        console.log(hasChildren);
+
+        if (hasChildren) {
+            originalNode.tags = originalNode.gender == 'male' ? ['main_male'] : ['main_female'];
+        } else {
+            originalNode.tags = originalNode.tags || [];
+        }
+
+        family.updateNode(originalNode, function () {
+            console.log('Original Node Updated:', originalNode);
+        });
     } catch {
-        console.log('No child node')
+        console.log('No original node');
     }
 });
 

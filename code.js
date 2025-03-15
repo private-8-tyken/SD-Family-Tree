@@ -175,6 +175,7 @@ FamilyTree.prototype.exportJSON = function (e) {
 }
 
 var family = new FamilyTree(document.getElementById("tree"), {
+    keyNavigation: { focusId: '_8e8e' }
     template: "main",
     scaleInitial: FamilyTree.match.boundary,
     //nodeTreeMenu: true,
